@@ -6,7 +6,9 @@ import androidx.lifecycle.LiveData;
 
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.database.dao.TransactionDao;
+import com.example.appquanlychitieu.data.model.CategorySpent;
 import com.example.appquanlychitieu.data.model.CategorySummary;
+import com.example.appquanlychitieu.data.model.MonthlySummary;
 import com.example.appquanlychitieu.data.model.Transaction;
 import com.example.appquanlychitieu.data.model.TransactionType;
 
@@ -58,6 +60,16 @@ public class TransactionRepository {
 
     public LiveData<Double> getSpentByCategory(long userId, long categoryId, long startDate, long endDate) {
         return transactionDao.getSpentByCategory(userId, categoryId, startDate, endDate);
+    }
+
+    // Lấy tổng chi tiêu tất cả danh mục trong một lần — dùng cho BudgetFragment
+    public LiveData<List<CategorySpent>> getSpentPerCategory(long userId, long startDate, long endDate) {
+        return transactionDao.getSpentPerCategory(userId, startDate, endDate);
+    }
+
+    // Lấy lịch sử tổng thu/chi theo từng tháng
+    public LiveData<List<MonthlySummary>> getMonthlySummary(long userId) {
+        return transactionDao.getMonthlySummary(userId);
     }
 
     public void deleteAllByUser(long userId) {

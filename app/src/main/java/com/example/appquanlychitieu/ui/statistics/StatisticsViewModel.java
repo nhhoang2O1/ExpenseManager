@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.appquanlychitieu.data.model.CategorySummary;
+import com.example.appquanlychitieu.data.model.MonthlySummary;
 import com.example.appquanlychitieu.data.model.TransactionType;
 import com.example.appquanlychitieu.data.repository.TransactionRepository;
 import com.example.appquanlychitieu.util.DateUtils;
@@ -22,6 +23,7 @@ public class StatisticsViewModel extends AndroidViewModel {
     private final long userId;
     private final MutableLiveData<int[]> selectedMonthYear = new MutableLiveData<>();
     private final LiveData<List<CategorySummary>> categorySummary;
+    private final LiveData<List<MonthlySummary>> monthlySummary;
 
     public StatisticsViewModel(@NonNull Application application) {
         super(application);
@@ -37,9 +39,13 @@ public class StatisticsViewModel extends AndroidViewModel {
             long end = DateUtils.getEndOfMonth(monthYear[0], monthYear[1]);
             return repository.getCategorySummary(userId, TransactionType.EXPENSE, start, end);
         });
+
+        // Lịch sử tài chính tất cả các tháng
+        monthlySummary = repository.getMonthlySummary(userId);
     }
 
     public LiveData<List<CategorySummary>> getCategorySummary() { return categorySummary; }
+    public LiveData<List<MonthlySummary>> getMonthlySummary() { return monthlySummary; }
     public MutableLiveData<int[]> getSelectedMonthYear() { return selectedMonthYear; }
 
     public void previousMonth() {

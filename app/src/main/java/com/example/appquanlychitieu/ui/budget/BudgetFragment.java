@@ -23,7 +23,9 @@ import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.model.Budget;
 import com.example.appquanlychitieu.data.model.Category;
+import com.example.appquanlychitieu.data.model.CategorySpent;
 import com.example.appquanlychitieu.data.model.TransactionType;
+import com.example.appquanlychitieu.data.repository.TransactionRepository;
 import com.example.appquanlychitieu.util.CurrencyFormatter;
 import com.example.appquanlychitieu.util.DateUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -37,6 +39,7 @@ import java.util.Map;
 public class BudgetFragment extends Fragment {
     private BudgetViewModel viewModel;
     private BudgetAdapter adapter;
+    private TransactionRepository transactionRepository;
     private List<Category> expenseCategories = new ArrayList<>();
 
     @Nullable
@@ -61,6 +64,7 @@ public class BudgetFragment extends Fragment {
         rvBudgets.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
+        transactionRepository = new TransactionRepository(requireActivity().getApplication());
 
         // Category cache
         AppDatabase db = AppDatabase.getDatabase(requireContext());
@@ -89,25 +93,26 @@ public class BudgetFragment extends Fragment {
                 adapter.setBudgets(budgets);
                 rvBudgets.setVisibility(View.VISIBLE);
                 tvEmpty.setVisibility(View.GONE);
-
-                // Calculate spent for each budget
-                int[] my = viewModel.getSelectedMonthYear().getValue();
-                if (my != null) {
-                    long start = DateUtils.getStartOfMonth(my[0], my[1]);
-                    long end = DateUtils.getEndOfMonth(my[0], my[1]);
-                    Map<Long, Double> spentMap = new HashMap<>();
-                    for (Budget b : budgets) {
-                        db.transactionDao().getSpentByCategory(viewModel.getUserId(), b.getCategoryId(), start, end)
-                                .observe(getViewLifecycleOwner(), spent -> {
-                                    spentMap.put(b.getCategoryId(), spent != null ? spent : 0);
-                                    adapter.setSpentMap(spentMap);
-                                });
-                    }
-                }
             } else {
                 rvBudgets.setVisibility(View.GONE);
                 tvEmpty.setVisibility(View.VISIBLE);
             }
+        });
+
+        // Lắng nghe tổng chi tiêu theo tháng đang chọn — 1 observer duy nhất thay vì N observers
+        viewModel.getSelectedMonthYear().observe(getViewLifecycleOwner(), monthYear -> {
+            long start = DateUtils.getStartOfMonth(monthYear[0], monthYear[1]);
+            long end = DateUtils.getEndOfMonth(monthYear[0], monthYear[1]);
+            transactionRepository.getSpentPerCategory(viewModel.getUserId(), start, end)
+                    .observe(getViewLifecycleOwner(), spentList -> {
+                        Map<Long, Double> spentMap = new HashMap<>();
+                        if (spentList != null) {
+                            for (CategorySpent item : spentList) {
+                                spentMap.put(item.categoryId, item.spent);
+                            }
+                        }
+                        adapter.setSpentMap(spentMap);
+                    });
         });
 
         btnPrev.setOnClickListener(v -> viewModel.previousMonth());

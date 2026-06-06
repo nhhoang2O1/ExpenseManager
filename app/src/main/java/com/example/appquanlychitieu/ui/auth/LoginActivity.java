@@ -11,6 +11,7 @@ import com.example.appquanlychitieu.MainActivity;
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.model.User;
+import com.example.appquanlychitieu.util.PasswordUtils;
 import com.example.appquanlychitieu.util.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -64,9 +65,11 @@ public class LoginActivity extends AppCompatActivity {
 
         AppDatabase db = AppDatabase.getDatabase(this);
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            User user = db.userDao().login(email, password);
+            // Lấy user theo email, sau đó verify password hash
+            User user = db.userDao().getUserByEmailForLogin(email);
+            boolean isPasswordCorrect = user != null && PasswordUtils.verify(password, user.getPassword());
             runOnUiThread(() -> {
-                if (user != null) {
+                if (isPasswordCorrect) {
                     sessionManager.createLoginSession(user.getId(), user.getName(), user.getEmail());
                     Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     navigateToMain();

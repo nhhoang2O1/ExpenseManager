@@ -156,6 +156,12 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             return;
         }
 
+        // Không cho phép nhập số âm hoặc bằng 0
+        if (amount <= 0) {
+            Toast.makeText(this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (selectedCategoryId == -1) {
             Toast.makeText(this, R.string.please_select_category, Toast.LENGTH_SHORT).show();
             return;

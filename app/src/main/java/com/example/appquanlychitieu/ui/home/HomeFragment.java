@@ -66,6 +66,24 @@ public class HomeFragment extends Fragment {
         // ViewModel
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
+        // Gọi API tỷ giá qua ViewModel — an toàn khi xoay màn hình, có cache 1 giờ
+        viewModel.getExchangeRate().observe(getViewLifecycleOwner(), rate -> {
+            if (rate != null && rate > 0) {
+                tvExchangeRate.setText("1 USD = " + CurrencyFormatter.formatNoSymbol(rate) + " ₫");
+            } else {
+                tvExchangeRate.setText("Không thể tải tỷ giá");
+            }
+        });
+
+        // Gọi API tỷ giá qua ViewModel — an toàn khi xoay màn hình, có cache 1 giờ
+        viewModel.getExchangeRate().observe(getViewLifecycleOwner(), rate -> {
+            if (rate != null && rate > 0) {
+                tvExchangeRate.setText("1 USD = " + CurrencyFormatter.formatNoSymbol(rate) + " ₫");
+            } else {
+                tvExchangeRate.setText("Không thể tải tỷ giá");
+            }
+        });
+
         // Observe category data for cache
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         db.categoryDao().getAllCategories().observe(getViewLifecycleOwner(), categories -> {
@@ -81,13 +99,17 @@ public class HomeFragment extends Fragment {
         viewModel.getTotalIncome().observe(getViewLifecycleOwner(), income -> {
             double inc = income != null ? income : 0;
             tvIncome.setText(CurrencyFormatter.format(inc));
-            updateBalance();
         });
 
         viewModel.getTotalExpense().observe(getViewLifecycleOwner(), expense -> {
             double exp = expense != null ? expense : 0;
             tvExpense.setText(CurrencyFormatter.format(exp));
-            updateBalance();
+        });
+
+        // Balance tự động cập nhật từ ViewModel
+        viewModel.getBalance().observe(getViewLifecycleOwner(), bal -> {
+            double b = bal != null ? bal : 0;
+            tvBalance.setText(CurrencyFormatter.format(b));
         });
 
         viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), transactions -> {
@@ -124,13 +146,5 @@ public class HomeFragment extends Fragment {
                 // Will handle delete later
             }
         });
-    }
-
-    private void updateBalance() {
-        Double income = viewModel.getTotalIncome().getValue();
-        Double expense = viewModel.getTotalExpense().getValue();
-        double inc = income != null ? income : 0;
-        double exp = expense != null ? expense : 0;
-        tvBalance.setText(CurrencyFormatter.format(inc - exp));
     }
 }

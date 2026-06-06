@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.model.User;
+import com.example.appquanlychitieu.util.PasswordUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -85,8 +86,9 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Tạo user mới
-            User user = new User(name, email, password);
+            // Tạo user mới — hash mật khẩu trước khi lưu vào database
+            String hashedPassword = PasswordUtils.hash(password);
+            User user = new User(name, email, hashedPassword);
             db.userDao().insert(user);
 
             runOnUiThread(() -> {

@@ -15,11 +15,9 @@ public interface UserDao {
     @Update
     void update(User user);
 
-    @Query("SELECT * FROM users WHERE email = :email AND password = :password LIMIT 1")
-    User login(String email, String password);
-
+    // Lấy user theo email, việc kiểm tra password hash thực hiện ở tầng Java
     @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
-    User getUserByEmail(String email);
+    User getUserByEmailForLogin(String email);
 
     @Query("SELECT * FROM users WHERE id = :id")
     User getUserById(long id);

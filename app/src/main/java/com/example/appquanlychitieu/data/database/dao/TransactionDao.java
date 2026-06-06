@@ -58,6 +58,21 @@ public interface TransactionDao {
     @Query("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE userId = :userId AND type = 'EXPENSE' AND categoryId = :categoryId AND date BETWEEN :startDate AND :endDate")
     LiveData<Double> getSpentByCategory(long userId, long categoryId, long startDate, long endDate);
 
+    // Lấy tổng chi tiêu theo từng categoryId trong một lần query (tránh tạo N observers)
+    @Query("SELECT categoryId, COALESCE(SUM(amount), 0) as spent FROM transactions " +
+            "WHERE userId = :userId AND type = 'EXPENSE' AND date BETWEEN :startDate AND :endDate " +
+            "GROUP BY categoryId")
+    LiveData<List<com.example.appquanlychitieu.data.model.CategorySpent>> getSpentPerCategory(long userId, long startDate, long endDate);
+
+    // Lấy tổng thu/chi theo từng tháng — dùng cho lịch sử tài chính
+    @Query("SELECT " +
+            "strftime('%Y-%m', datetime(date/1000, 'unixepoch')) as monthYear, " +
+            "COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) as totalIncome, " +
+            "COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) as totalExpense " +
+            "FROM transactions WHERE userId = :userId " +
+            "GROUP BY monthYear ORDER BY monthYear DESC")
+    LiveData<List<com.example.appquanlychitieu.data.model.MonthlySummary>> getMonthlySummary(long userId);
+
     @Query("DELETE FROM transactions WHERE userId = :userId")
     void deleteAllByUser(long userId);
 
