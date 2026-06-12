@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.appquanlychitieu.R;
@@ -39,9 +41,9 @@ public class BudgetFragment extends Fragment {
     private BudgetListAdapter adapter;
     private TransactionRepository transactionRepository;
     private List<Category> expenseCategories = new ArrayList<>();
-    private androidx.lifecycle.Observer<List<Category>> categoriesObserver;
-    private androidx.lifecycle.LiveData<List<CategorySpent>> spentLiveData;
-    private androidx.lifecycle.Observer<List<CategorySpent>> spentObserver;
+    private Observer<List<Category>> categoriesObserver;
+    private LiveData<List<CategorySpent>> spentLiveData;
+    private Observer<List<CategorySpent>> spentObserver;
 
     @Nullable
     @Override

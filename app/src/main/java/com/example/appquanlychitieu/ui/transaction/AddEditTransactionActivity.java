@@ -8,6 +8,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
@@ -36,8 +38,8 @@ public class AddEditTransactionActivity extends AppCompatActivity {
     private long editTransactionId = -1;
     private long userId;
     private CategoryGridViewAdapter categoryAdapter;
-    private androidx.lifecycle.LiveData<List<Category>> categoryLiveData;
-    private androidx.lifecycle.Observer<List<Category>> categoryObserver;
+    private LiveData<List<Category>> categoryLiveData;
+    private Observer<List<Category>> categoryObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
