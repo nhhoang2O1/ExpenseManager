@@ -100,7 +100,7 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         if (categoryLiveData != null && categoryObserver != null) {
             categoryLiveData.removeObserver(categoryObserver);
         }
-        
+
         // Tạo observer mới và observe
         categoryLiveData = db.categoryDao().getCategoriesByType(selectedType);
         categoryObserver = categories -> categoryAdapter.setCategories(categories);
