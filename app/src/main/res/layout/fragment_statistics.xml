@@ -89,14 +89,16 @@
         </androidx.cardview.widget.CardView>
 
         <!-- Category Summary List -->
-        <androidx.recyclerview.widget.RecyclerView
+        <ListView
             android:id="@+id/rv_category_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
             android:paddingStart="@dimen/spacing_md"
             android:paddingEnd="@dimen/spacing_md"
-            android:paddingBottom="@dimen/spacing_lg" />
+            android:paddingBottom="@dimen/spacing_lg"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:nestedScrollingEnabled="false" />
 
         <!-- Empty State -->
         <TextView
@@ -133,10 +135,12 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
 
-                <androidx.recyclerview.widget.RecyclerView
+                <ListView
                     android:id="@+id/rv_monthly_history"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:divider="@null"
+                    android:dividerHeight="0dp"
                     android:nestedScrollingEnabled="false" />
 
                 <TextView

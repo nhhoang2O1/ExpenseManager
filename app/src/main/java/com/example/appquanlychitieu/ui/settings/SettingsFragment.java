@@ -10,14 +10,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.ui.auth.LoginActivity;
-import com.example.appquanlychitieu.util.CsvExporter;
 import com.example.appquanlychitieu.util.SessionManager;
+import com.example.appquanlychitieu.util.ThemeManager;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
@@ -35,45 +34,14 @@ public class SettingsFragment extends Fragment {
 
         sessionManager = new SessionManager(requireContext());
 
-        View cardExport = view.findViewById(R.id.card_export_csv);
         View cardReset = view.findViewById(R.id.card_reset_data);
         View cardLogout = view.findViewById(R.id.card_logout);
         SwitchMaterial switchDarkMode = view.findViewById(R.id.switch_dark_mode);
 
         // Dark mode
-        int currentMode = AppCompatDelegate.getDefaultNightMode();
-        switchDarkMode.setChecked(currentMode == AppCompatDelegate.MODE_NIGHT_YES);
+        switchDarkMode.setChecked(ThemeManager.isDarkMode(requireContext()));
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            AppCompatDelegate.setDefaultNightMode(
-                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-        });
-
-        // Export CSV
-        cardExport.setOnClickListener(v -> {
-            AppDatabase db = AppDatabase.getDatabase(requireContext());
-            db.transactionDao().getAllTransactions(sessionManager.getUserId()).observe(getViewLifecycleOwner(), transactions -> {
-                if (transactions != null && !transactions.isEmpty()) {
-                    CsvExporter.exportTransactions(requireContext(), transactions, new CsvExporter.ExportCallback() {
-                        @Override
-                        public void onSuccess(String filePath) {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(),
-                                            getString(R.string.export_success) + ": " + filePath,
-                                            Toast.LENGTH_LONG).show());
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(),
-                                            getString(R.string.export_failed) + ": " + message,
-                                            Toast.LENGTH_SHORT).show());
-                        }
-                    });
-                } else {
-                    Toast.makeText(requireContext(), R.string.no_transactions, Toast.LENGTH_SHORT).show();
-                }
-            });
+            ThemeManager.setDarkMode(requireContext(), isChecked);
         });
 
         // Reset data

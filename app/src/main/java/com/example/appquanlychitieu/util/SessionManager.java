@@ -36,7 +36,8 @@ public class SessionManager {
      * Kiểm tra đã đăng nhập chưa
      */
     public boolean isLoggedIn() {
-        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false)
+                && prefs.getLong(KEY_USER_ID, -1) > 0;
     }
 
     /**

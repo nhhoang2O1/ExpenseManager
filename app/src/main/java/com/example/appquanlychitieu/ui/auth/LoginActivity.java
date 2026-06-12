@@ -27,12 +27,14 @@ public class LoginActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
-        // Kiểm tra đã đăng nhập chưa
         if (sessionManager.isLoggedIn()) {
-            navigateToMain();
-            return;
+            validateSavedSession();
+        } else {
+            showLoginForm();
         }
+    }
 
+    private void showLoginForm() {
         setContentView(R.layout.activity_login);
 
         etEmail = findViewById(R.id.et_email);
@@ -44,6 +46,26 @@ public class LoginActivity extends AppCompatActivity {
 
         tvRegister.setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterActivity.class));
+        });
+    }
+
+    private void validateSavedSession() {
+        AppDatabase db = AppDatabase.getDatabase(this);
+        long userId = sessionManager.getUserId();
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            User user = userId > 0 ? db.userDao().getUserById(userId) : null;
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                if (user != null) {
+                    navigateToMain();
+                } else {
+                    sessionManager.logout();
+                    showLoginForm();
+                }
+            });
         });
     }
 

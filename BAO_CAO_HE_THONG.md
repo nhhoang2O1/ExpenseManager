@@ -1,363 +1,302 @@
-# BÁO CÁO KIỂM THỬ VÀ ĐÁNH GIÁ HỆ THỐNG
-## Ứng dụng Quản Lý Chi Tiêu Cá Nhân (AppQuanLyChiTieu)
+# BÁO CÁO HỆ THỐNG — ỨNG DỤNG QUẢN LÝ CHI TIÊU CÁ NHÂN
 
-**Ngày lập báo cáo:** 01/06/2026  
-**Nền tảng:** Android (Java)  
-**Phiên bản:** 1.0 (versionCode 1)  
-**Min SDK:** 26 (Android 8.0) | **Target SDK:** 35 (Android 15)
+> Môn học: Lập trình Mobile · Nền tảng: Android (Java thuần) · Kiến trúc: MVVM + Repository · Lưu trữ: Room (SQLite)
 
 ---
 
-## 1. TỔNG QUAN HỆ THỐNG
+## 1. Tổng quan đồ án
 
-### 1.1 Mô tả ứng dụng
-Ứng dụng quản lý chi tiêu cá nhân cho phép người dùng theo dõi thu nhập, chi tiêu, đặt ngân sách theo tháng và xem thống kê tài chính. Dữ liệu được lưu trữ cục bộ trên thiết bị bằng SQLite thông qua Room Database.
+### 1.1. Mục tiêu
+Ứng dụng **Quản lý Chi tiêu cá nhân** giúp người dùng ghi lại các khoản **thu nhập** và **chi tiêu** hằng ngày, theo dõi **số dư**, đặt **hạn mức ngân sách** theo từng danh mục/tháng và **thống kê** chi tiêu bằng biểu đồ. Toàn bộ dữ liệu được lưu **cục bộ (offline)** trên máy bằng cơ sở dữ liệu SQLite (thông qua Room), không phụ thuộc máy chủ.
 
-### 1.2 Kiến trúc hệ thống
-- **Mô hình:** MVVM (Model - View - ViewModel)
-- **Database:** Room (SQLite)
-- **Reactive UI:** LiveData + ViewModel
-- **Navigation:** Navigation Component (Bottom Navigation)
-- **UI Framework:** Material Design 3
+### 1.2. Đối tượng người dùng
+- Cá nhân muốn kiểm soát tài chính hằng ngày một cách đơn giản.
+- Ứng dụng hỗ trợ **nhiều tài khoản trên cùng một thiết bị**: mỗi người dùng đăng ký/đăng nhập riêng, dữ liệu giao dịch và ngân sách được tách biệt theo `userId`.
 
-### 1.3 Cấu trúc module
+### 1.3. Các chức năng chính
+| Nhóm | Chức năng |
+|------|-----------|
+| Tài khoản | Đăng ký, đăng nhập, đăng xuất, lưu phiên đăng nhập |
+| Giao dịch | Thêm / sửa / xóa giao dịch thu - chi; lọc theo loại; xem giao dịch gần nhất |
+| Trang chủ | Hiển thị số dư, tổng thu, tổng chi trong tháng và 5 giao dịch gần nhất |
+| Ngân sách | Đặt hạn mức theo danh mục theo từng tháng, theo dõi % đã chi và phần còn lại / vượt |
+| Thống kê | Biểu đồ tròn chi tiêu theo danh mục + lịch sử thu/chi theo tháng |
+| Cài đặt | Bật/tắt chế độ tối, xuất dữ liệu ra CSV, đặt lại dữ liệu, đăng xuất |
+
+---
+
+## 2. Sơ đồ kiến trúc (MVVM + Repository)
+
+### 2.1. Luồng dữ liệu
+Ứng dụng tuân theo mô hình **MVVM** kết hợp tầng **Repository**:
 
 ```
-app/
-├── data/
-│   ├── database/         # Room DB, DAO, Converters
-│   ├── model/            # Entity classes
-│   └── repository/       # Repository pattern
-├── ui/
-│   ├── auth/             # Đăng nhập, Đăng ký
-│   ├── home/             # Màn hình chính
-│   ├── transaction/      # Danh sách & thêm/sửa giao dịch
-│   ├── budget/           # Quản lý ngân sách
-│   ├── statistics/       # Thống kê biểu đồ
-│   └── settings/         # Cài đặt
-└── util/                 # Tiện ích: DateUtils, CurrencyFormatter, CsvExporter
+┌─────────────┐   observe(LiveData)   ┌──────────────┐   gọi hàm   ┌──────────────┐
+│    VIEW     │ ◀──────────────────── │  VIEW MODEL  │ ──────────▶ │  REPOSITORY  │
+│ Activity /  │                       │ (AndroidVM)  │             │              │
+│ Fragment    │ ──── sự kiện UI ─────▶ │              │             │              │
+└─────────────┘                       └──────────────┘             └──────┬───────┘
+                                                                          │ gọi DAO
+                                                                          ▼
+                                                                   ┌──────────────┐
+                                                                   │     DAO      │
+                                                                   │  (@Query...) │
+                                                                   └──────┬───────┘
+                                                                          ▼
+                                                                   ┌──────────────┐
+                                                                   │ ROOM (SQLite)│
+                                                                   └──────────────┘
 ```
 
----
+- **View** (`HomeFragment`, `TransactionListFragment`, `BudgetFragment`, `StatisticsFragment`, `SettingsFragment`, các Activity) chỉ chịu trách nhiệm hiển thị và bắt sự kiện người dùng. View **đăng ký (observe)** các `LiveData` của ViewModel.
+- **ViewModel** (`HomeViewModel`, `TransactionListViewModel`, `BudgetViewModel`, `StatisticsViewModel`) giữ và xử lý dữ liệu phục vụ màn hình, sống độc lập với vòng đời xoay màn hình. Tất cả kế thừa `AndroidViewModel` để có `Application` context.
+- **Repository** (`TransactionRepository`, `CategoryRepository`, `BudgetRepository`) là lớp trung gian che giấu nguồn dữ liệu; nó gọi DAO và chạy các thao tác ghi trên luồng nền (`databaseWriteExecutor`).
+- **DAO** (`TransactionDao`, `CategoryDao`, `BudgetDao`, `UserDao`) khai báo truy vấn SQL qua annotation Room.
+- **Room/SQLite** (`AppDatabase`) là nơi lưu trữ thật sự.
 
-## 2. DANH SÁCH TÍNH NĂNG
-
-| STT | Tính năng | Trạng thái |
-|-----|-----------|------------|
-| 1 | Đăng ký tài khoản | ✅ Hoạt động |
-| 2 | Đăng nhập / Đăng xuất | ✅ Hoạt động |
-| 3 | Ghi nhận giao dịch thu/chi | ✅ Hoạt động |
-| 4 | Sửa / Xóa giao dịch | ✅ Hoạt động |
-| 5 | Lọc giao dịch theo loại | ✅ Hoạt động |
-| 6 | Xem tổng thu/chi/số dư tháng | ✅ Hoạt động |
-| 7 | Đặt ngân sách theo danh mục | ✅ Hoạt động |
-| 8 | Theo dõi % sử dụng ngân sách | ✅ Hoạt động |
-| 9 | Thống kê biểu đồ tròn theo tháng | ✅ Hoạt động |
-| 10 | Xuất dữ liệu ra file CSV | ✅ Hoạt động |
-| 11 | Chế độ tối (Dark Mode) | ✅ Hoạt động |
-| 12 | Xóa toàn bộ dữ liệu | ✅ Hoạt động |
-| 13 | Danh mục mặc định tự động tạo | ✅ Hoạt động |
+### 2.2. Lý do chọn kiến trúc
+- **Tách biệt trách nhiệm**: UI không trực tiếp đụng tới SQL → dễ đọc, dễ bảo trì.
+- **Tự động cập nhật giao diện**: nhờ `LiveData`, khi dữ liệu trong Room thay đổi, các màn hình đang quan sát sẽ được cập nhật mà không cần load lại thủ công.
+- **An toàn vòng đời**: `ViewModel` + `LiveData` chỉ phát dữ liệu khi View ở trạng thái active, tránh rò rỉ bộ nhớ và crash khi xoay màn hình.
+- **Đúng chuẩn Android hiện đại** (AndroidX Lifecycle), phù hợp yêu cầu thể hiện kiến thức môn học.
 
 ---
 
-## 3. KIỂM THỬ CHỨC NĂNG (Functional Testing)
+## 3. Giải thích từng thành phần quan trọng
 
-### 3.1 Module Xác thực (Authentication)
+### 3.1. Khởi tạo & điều hướng
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `ExpenseManagerApp` | Lớp Application | Khởi tạo database khi app chạy (kích hoạt callback nạp danh mục mặc định) | `Application`, vòng đời app |
+| `MainActivity` | Khung chứa chính sau đăng nhập | Gắn `BottomNavigationView` với `NavController` để chuyển giữa các Fragment | **Navigation Component**, **BottomNavigation**, Fragment |
 
-#### TC-01: Đăng ký tài khoản hợp lệ
-- **Đầu vào:** Họ tên, email hợp lệ, mật khẩu ≥ 6 ký tự, xác nhận mật khẩu khớp
-- **Kết quả mong đợi:** Tạo tài khoản thành công, chuyển về màn hình đăng nhập
-- **Kết quả thực tế:** ✅ PASS
+### 3.2. Tầng xác thực (`ui/auth`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `LoginActivity` | Đăng nhập | Kiểm tra phiên (nếu đã đăng nhập thì vào thẳng Main); xác thực email + mật khẩu hash; tạo session | **Activity**, **Intent**, **SharedPreferences** (qua `SessionManager`), xử lý nền bằng `ExecutorService`, `runOnUiThread` |
+| `RegisterActivity` | Đăng ký | Kiểm tra hợp lệ (email, độ dài mật khẩu, xác nhận khớp), kiểm tra email trùng, **hash mật khẩu** rồi lưu | Validation form, `Patterns.EMAIL_ADDRESS`, hash SHA-256, Room insert |
 
-#### TC-02: Đăng ký với email đã tồn tại
-- **Đầu vào:** Email đã được đăng ký trước đó
-- **Kết quả mong đợi:** Hiển thị lỗi "Email đã được sử dụng"
-- **Kết quả thực tế:** ✅ PASS — kiểm tra `checkEmailExists()` trước khi insert
+Ví dụ thực tế (đăng nhập — verify mật khẩu ở tầng Java, không so sánh plaintext trong SQL):
+```java
+User user = db.userDao().getUserByEmailForLogin(email);
+boolean ok = user != null && PasswordUtils.verify(password, user.getPassword());
+```
 
-#### TC-03: Đăng ký với email sai định dạng
-- **Đầu vào:** `"abc"`, `"abc@"`, `"@gmail.com"`
-- **Kết quả mong đợi:** Hiển thị lỗi "Email không hợp lệ"
-- **Kết quả thực tế:** ✅ PASS — dùng `Patterns.EMAIL_ADDRESS`
+### 3.3. Trang chủ (`ui/home`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `HomeFragment` | Tổng quan tháng | Hiển thị số dư/thu/chi và 5 giao dịch gần nhất trên **ListView**; FAB thêm giao dịch | **Fragment**, **ListView + BaseAdapter**, **LiveData observe**, `FloatingActionButton`, điều hướng |
+| `HomeViewModel` | Cấp dữ liệu trang chủ | Lấy tổng thu, tổng chi trong tháng; tính **số dư** bằng `MediatorLiveData` (gộp 2 nguồn thu & chi) | `AndroidViewModel`, `LiveData`, **`MediatorLiveData`** |
 
-#### TC-04: Đăng ký mật khẩu < 6 ký tự
-- **Đầu vào:** Mật khẩu `"123"`
-- **Kết quả mong đợi:** Hiển thị lỗi "Mật khẩu phải có ít nhất 6 ký tự"
-- **Kết quả thực tế:** ✅ PASS
+Số dư được tính phản ứng theo cả thu lẫn chi:
+```java
+balance.addSource(totalIncome, inc -> balance.setValue(safe(inc) - safe(totalExpense.getValue())));
+balance.addSource(totalExpense, exp -> balance.setValue(safe(totalIncome.getValue()) - safe(exp)));
+```
 
-#### TC-05: Đăng ký mật khẩu xác nhận không khớp
-- **Đầu vào:** Password `"123456"`, Confirm `"654321"`
-- **Kết quả mong đợi:** Hiển thị lỗi "Mật khẩu xác nhận không khớp"
-- **Kết quả thực tế:** ✅ PASS
+### 3.4. Giao dịch (`ui/transaction`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `AddEditTransactionActivity` | Thêm/sửa giao dịch | Nhập số tiền, ghi chú, ngày (DatePicker), chọn loại thu/chi (toggle), chọn danh mục qua **GridView** | **Activity**, **Intent + extras**, **GridView + BaseAdapter**, `DatePickerDialog`, `MaterialButtonToggleGroup` |
+| `CategoryGridViewAdapter` | Adapter danh mục | Hiển thị danh mục dạng lưới biểu tượng, có hiệu ứng chọn | **GridView**, **BaseAdapter**, **ViewHolder pattern** |
+| `TransactionListAdapter` | Adapter danh sách giao dịch | Hiển thị giao dịch trong ListView, tô màu thu/chi, dùng cache danh mục | **ListView**, **BaseAdapter**, ViewHolder, callback click/long-click |
+| `TransactionListFragment` | Danh sách & lọc | Hiển thị toàn bộ giao dịch, lọc theo Tất cả/Thu/Chi bằng `Chip`, long-click để xóa | Fragment, ListView, `AlertDialog`, Chip filter |
+| `TransactionListViewModel` | Dữ liệu danh sách | Đổi nguồn dữ liệu theo bộ lọc bằng `switchMap` | **`Transformations.switchMap`**, `MutableLiveData` |
+| `TransactionAdapter` | (RecyclerView – bản thay thế) | Adapter RecyclerView tương đương; hiện UI dùng bản ListView | RecyclerView (tham khảo) |
 
-#### TC-06: Đăng nhập đúng thông tin
-- **Đầu vào:** Email và mật khẩu đúng
-- **Kết quả mong đợi:** Chuyển sang MainActivity, lưu session
-- **Kết quả thực tế:** ✅ PASS
+Lọc giao dịch theo loại (đổi nguồn LiveData động):
+```java
+transactions = Transformations.switchMap(filterType, type -> {
+    if ("EXPENSE".equals(type)) return repository.getTransactionsByType(userId, EXPENSE);
+    if ("INCOME".equals(type))  return repository.getTransactionsByType(userId, INCOME);
+    return repository.getAllTransactions(userId);
+});
+```
 
-#### TC-07: Đăng nhập sai mật khẩu
-- **Đầu vào:** Email đúng, mật khẩu sai
-- **Kết quả mong đợi:** Toast "Email hoặc mật khẩu không đúng!"
-- **Kết quả thực tế:** ✅ PASS
+### 3.5. Ngân sách (`ui/budget`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `BudgetFragment` | Quản lý hạn mức | Chọn tháng (trước/sau), thêm ngân sách bằng dialog (Spinner + EditText), hiển thị tiến độ chi | Fragment, ListView, `Spinner`, `ArrayAdapter`, `AlertDialog` dựng động |
+| `BudgetViewModel` | Dữ liệu ngân sách | Theo dõi tháng được chọn, lấy ngân sách theo tháng bằng `switchMap` | `switchMap`, `MutableLiveData<int[]>` |
+| `BudgetListAdapter` | Adapter ngân sách | Hiển thị hạn mức, đã chi, % và còn lại/vượt bằng `ProgressBar` | **ListView + BaseAdapter**, `ProgressBar`, tô màu theo trạng thái |
+| `BudgetAdapter` | (RecyclerView – bản thay thế) | Tương đương bản RecyclerView | RecyclerView (tham khảo) |
 
-#### TC-08: Tự động đăng nhập khi đã có session
-- **Điều kiện:** Đã đăng nhập trước đó, mở lại app
-- **Kết quả mong đợi:** Bỏ qua LoginActivity, vào thẳng MainActivity
-- **Kết quả thực tế:** ✅ PASS — kiểm tra `sessionManager.isLoggedIn()` trong `onCreate()`
+### 3.6. Thống kê (`ui/statistics`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `StatisticsFragment` | Trực quan hóa | Vẽ **biểu đồ tròn** chi tiêu theo danh mục + 2 ListView (tổng theo danh mục và lịch sử theo tháng) | **MPAndroidChart (PieChart)**, ListView + BaseAdapter (lớp lồng), điều hướng tháng |
+| `StatisticsViewModel` | Dữ liệu thống kê | Lấy tổng theo danh mục của tháng (`switchMap`) và lịch sử tổng thu/chi mọi tháng | `switchMap`, LiveData |
 
----
+### 3.7. Cài đặt (`ui/settings`)
+| Class | Mục đích | Làm gì | Kiến thức áp dụng |
+|-------|----------|--------|-------------------|
+| `SettingsFragment` | Tùy chọn | Bật/tắt **dark mode**, **xuất CSV** giao dịch, **đặt lại dữ liệu** người dùng, **đăng xuất** | `SwitchMaterial`, `AppCompatDelegate` (night mode), ghi file, `AlertDialog`, quản lý phiên |
 
-### 3.2 Module Giao dịch (Transaction)
-
-#### TC-09: Thêm giao dịch chi tiêu hợp lệ
-- **Đầu vào:** Số tiền 50000, danh mục "Ăn uống", ngày hôm nay
-- **Kết quả mong đợi:** Lưu thành công, hiển thị trong danh sách
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-10: Thêm giao dịch không nhập số tiền
-- **Đầu vào:** Để trống ô số tiền
-- **Kết quả mong đợi:** Toast "Vui lòng nhập số tiền"
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-11: Thêm giao dịch với số tiền = 0 (sau khi sửa)
-- **Đầu vào:** Số tiền `0`
-- **Kết quả mong đợi:** Toast "Số tiền phải lớn hơn 0"
-- **Kết quả thực tế:** ✅ PASS — **lỗi đã được sửa**
-
-#### TC-12: Thêm giao dịch với số tiền âm (sau khi sửa)
-- **Đầu vào:** Số tiền `-100000`
-- **Kết quả mong đợi:** Toast "Số tiền phải lớn hơn 0"
-- **Kết quả thực tế:** ✅ PASS — **lỗi đã được sửa**
-
-#### TC-13: Thêm giao dịch không chọn danh mục
-- **Đầu vào:** Nhập số tiền nhưng không chọn danh mục
-- **Kết quả mong đợi:** Toast "Vui lòng chọn danh mục"
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-14: Sửa giao dịch đã có
-- **Đầu vào:** Nhấn vào giao dịch trong danh sách, thay đổi số tiền
-- **Kết quả mong đợi:** Cập nhật thành công, hiển thị giá trị mới
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-15: Xóa giao dịch (long press)
-- **Đầu vào:** Giữ lâu vào giao dịch, xác nhận xóa
-- **Kết quả mong đợi:** Giao dịch bị xóa khỏi danh sách
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-16: Lọc giao dịch theo loại
-- **Đầu vào:** Nhấn chip "Chi tiêu" / "Thu nhập" / "Tất cả"
-- **Kết quả mong đợi:** Danh sách lọc đúng theo loại
-- **Kết quả thực tế:** ✅ PASS
+### 3.8. Tiện ích (`util`)
+| Class | Mục đích | Kiến thức áp dụng |
+|-------|----------|-------------------|
+| `PasswordUtils` | Hash & xác minh mật khẩu SHA-256 (không cần thư viện ngoài) | `MessageDigest`, bảo mật cơ bản |
+| `SessionManager` | Lưu/đọc/xóa phiên đăng nhập | **SharedPreferences** |
+| `CurrencyFormatter` | Định dạng tiền tệ kiểu Việt Nam (dấu chấm, ký hiệu ₫) | `DecimalFormat`, `Locale("vi","VN")` |
+| `DateUtils` | Định dạng/khoảng ngày, nhãn "Hôm nay/Hôm qua", đầu–cuối tháng | `SimpleDateFormat`, `Calendar`, Locale VN |
+| `CsvExporter` | Xuất giao dịch ra file CSV (có BOM cho Excel tiếng Việt) | I/O file, `FileWriter`, luồng nền |
 
 ---
 
-### 3.3 Module Trang chủ (Home)
+## 4. Mô hình cơ sở dữ liệu
 
-#### TC-17: Hiển thị tổng thu nhập tháng hiện tại
-- **Điều kiện:** Có giao dịch thu nhập trong tháng
-- **Kết quả mong đợi:** Tổng thu nhập hiển thị đúng
-- **Kết quả thực tế:** ✅ PASS
+Cơ sở dữ liệu Room tên `expense_manager_db`, **version 2**, gồm 4 bảng (entity): `users`, `categories`, `transactions`, `budgets`.
 
-#### TC-18: Hiển thị số dư (balance) tự động (sau khi sửa)
-- **Điều kiện:** Có cả thu nhập và chi tiêu
-- **Kết quả mong đợi:** Balance = Thu nhập - Chi tiêu, tự cập nhật khi thêm giao dịch
-- **Kết quả thực tế:** ✅ PASS — **logic đã chuyển vào ViewModel với MediatorLiveData**
+### 4.1. Bảng `users`
+| Cột | Kiểu | Ràng buộc |
+|-----|------|-----------|
+| `id` | long | Khóa chính, tự tăng |
+| `name` | String | Tên hiển thị |
+| `email` | String | **Index UNIQUE** (không trùng email) |
+| `password` | String | Lưu **hash SHA-256**, không lưu plaintext |
+| `createdAt` | long | Thời điểm tạo (millis) |
 
-#### TC-19: Hiển thị 5 giao dịch gần nhất
-- **Điều kiện:** Có nhiều hơn 5 giao dịch trong tháng
-- **Kết quả mong đợi:** Chỉ hiển thị 5 giao dịch mới nhất
-- **Kết quả thực tế:** ✅ PASS — query có `LIMIT :limit`
+### 4.2. Bảng `categories`
+| Cột | Kiểu | Ý nghĩa |
+|-----|------|---------|
+| `id` | long | Khóa chính, tự tăng |
+| `name` | String | Tên danh mục (Ăn uống, Lương...) |
+| `icon` | String | Tên tài nguyên icon (vd `ic_food`) |
+| `color` | String | Mã màu hex (vd `#FF5722`) |
+| `type` | TransactionType | `EXPENSE` hoặc `INCOME` (lưu dạng text qua Converter) |
+| `isDefault` | boolean | Đánh dấu danh mục mặc định |
 
-#### TC-20: Màn hình trống khi chưa có giao dịch
-- **Điều kiện:** Tài khoản mới, chưa có giao dịch
-- **Kết quả mong đợi:** Hiển thị thông báo trống
-- **Kết quả thực tế:** ✅ PASS
+Khi tạo DB lần đầu, callback `onCreate` tự **nạp sẵn 13 danh mục mặc định** (9 chi tiêu + 4 thu nhập).
 
----
+### 4.3. Bảng `transactions`
+| Cột | Kiểu | Ràng buộc |
+|-----|------|-----------|
+| `id` | long | Khóa chính, tự tăng |
+| `amount` | double | Số tiền |
+| `note` | String | Ghi chú |
+| `date` | long | Thời gian (timestamp millis) |
+| `categoryId` | long | **Khóa ngoại → categories.id** (`ON DELETE SET NULL`), có index |
+| `type` | TransactionType | Thu / Chi |
+| `userId` | long | Chủ sở hữu giao dịch |
 
-### 3.4 Module Ngân sách (Budget)
+### 4.4. Bảng `budgets`
+| Cột | Kiểu | Ràng buộc |
+|-----|------|-----------|
+| `id` | long | Khóa chính, tự tăng |
+| `categoryId` | long | **Khóa ngoại → categories.id** (`ON DELETE CASCADE`) |
+| `amount` | double | Hạn mức |
+| `monthYear` | String | Định dạng `"YYYY-MM"` |
+| `userId` | long | Chủ sở hữu |
 
-#### TC-21: Thêm ngân sách cho danh mục
-- **Đầu vào:** Chọn danh mục "Ăn uống", hạn mức 2.000.000đ
-- **Kết quả mong đợi:** Ngân sách được lưu, hiển thị trong danh sách
-- **Kết quả thực tế:** ✅ PASS
+Có **Index UNIQUE** trên bộ `(categoryId, monthYear, userId)` → mỗi danh mục chỉ có 1 hạn mức/tháng/người dùng; khi thêm trùng sẽ **REPLACE**.
 
-#### TC-22: Hiển thị % sử dụng ngân sách (sau khi sửa)
-- **Điều kiện:** Có giao dịch chi tiêu thuộc danh mục đã đặt ngân sách
-- **Kết quả mong đợi:** Progress bar và % hiển thị đúng, không bị memory leak
-- **Kết quả thực tế:** ✅ PASS — **đã sửa từ N observers thành 1 observer**
+### 4.5. Quan hệ giữa các bảng
+```
+users (1) ───< transactions (N)      [logic, qua userId]
+users (1) ───< budgets (N)           [logic, qua userId]
+categories (1) ───< transactions (N) [khóa ngoại, SET NULL khi xóa danh mục]
+categories (1) ───< budgets (N)      [khóa ngoại, CASCADE khi xóa danh mục]
+```
+> Ghi chú: quan hệ `users → transactions/budgets` được quản lý ở mức logic bằng cột `userId` (không khai báo foreign key), còn `categories` được ràng buộc khóa ngoại thật sự ở Room.
 
-#### TC-23: Cảnh báo vượt ngân sách
-- **Điều kiện:** Chi tiêu > hạn mức đặt ra
-- **Kết quả mong đợi:** Hiển thị "Vượt: X đ" màu đỏ
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-24: Chuyển tháng trong Budget
-- **Đầu vào:** Nhấn nút mũi tên trái/phải
-- **Kết quả mong đợi:** Hiển thị ngân sách và chi tiêu của tháng tương ứng
-- **Kết quả thực tế:** ✅ PASS
-
----
-
-### 3.5 Module Thống kê (Statistics)
-
-#### TC-25: Biểu đồ tròn hiển thị chi tiêu theo danh mục
-- **Điều kiện:** Có giao dịch chi tiêu trong tháng
-- **Kết quả mong đợi:** Biểu đồ tròn hiển thị đúng màu sắc và tỷ lệ %
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-26: Chuyển tháng trong Statistics
-- **Đầu vào:** Nhấn nút mũi tên
-- **Kết quả mong đợi:** Biểu đồ cập nhật theo tháng được chọn
-- **Kết quả thực tế:** ✅ PASS
-
-#### TC-27: Màn hình trống khi không có dữ liệu
-- **Điều kiện:** Tháng không có giao dịch
-- **Kết quả mong đợi:** Ẩn biểu đồ, hiển thị thông báo trống
-- **Kết quả thực tế:** ✅ PASS
+### 4.6. Lớp dữ liệu phụ trợ (không phải bảng)
+- `CategorySummary`: nhận kết quả query gộp tổng tiền + số giao dịch theo danh mục.
+- `CategorySpent`: nhận tổng chi theo từng `categoryId` trong 1 lần query.
+- `MonthlySummary`: tổng thu/chi theo tháng (có `getBalance()`).
+- `TransactionType`: enum `EXPENSE` / `INCOME`, lưu xuống DB qua `Converters`.
 
 ---
 
-### 3.6 Module Cài đặt (Settings)
+## 5. Luồng nghiệp vụ tiêu biểu
 
-#### TC-28: Bật/tắt Dark Mode
-- **Đầu vào:** Toggle switch Dark Mode
-- **Kết quả mong đợi:** Giao diện chuyển sang tối/sáng ngay lập tức
-- **Kết quả thực tế:** ✅ PASS
+### 5.1. Đăng ký → Đăng nhập
+1. Mở app → `LoginActivity`. Nếu `SessionManager.isLoggedIn()` = true → vào thẳng `MainActivity`.
+2. Người dùng bấm "Đăng ký" → `RegisterActivity`: nhập tên, email, mật khẩu, xác nhận.
+3. Validate: email đúng định dạng, mật khẩu ≥ 6 ký tự, xác nhận khớp; kiểm tra email đã tồn tại.
+4. Hash mật khẩu (SHA-256) rồi `userDao.insert(user)`. Quay về màn đăng nhập.
+5. Đăng nhập: lấy user theo email → `PasswordUtils.verify(...)`. Đúng → `createLoginSession(...)` (lưu vào SharedPreferences) → vào `MainActivity`.
 
-#### TC-29: Xuất CSV
-- **Điều kiện:** Có giao dịch, Android ≤ 9 (API 28)
-- **Kết quả mong đợi:** File CSV được tạo trong thư mục Downloads
-- **Kết quả thực tế:** ✅ PASS (Android ≤ 9) | ⚠️ CẦN KIỂM TRA (Android 10+)
+### 5.2. Thêm giao dịch
+1. Từ Trang chủ hoặc danh sách, bấm **FAB** → `AddEditTransactionActivity`.
+2. Chọn loại (Thu/Chi) → `loadCategories()` nạp danh mục đúng loại vào **GridView**.
+3. Nhập số tiền, ghi chú, chọn ngày (`DatePickerDialog`), chọn danh mục trong lưới.
+4. Bấm Lưu → validate (số tiền > 0, đã chọn danh mục) → tạo `Transaction` → `transactionDao.insert(...)` trên luồng nền.
+5. Đóng màn hình; nhờ LiveData, Trang chủ và Danh sách **tự cập nhật**.
 
-#### TC-30: Xóa toàn bộ dữ liệu
-- **Đầu vào:** Xác nhận xóa trong dialog
-- **Kết quả mong đợi:** Xóa tất cả giao dịch và ngân sách của user hiện tại
-- **Kết quả thực tế:** ✅ PASS
+### 5.3. Đặt ngân sách
+1. Vào tab Ngân sách → `BudgetFragment`, chọn tháng bằng nút trước/sau.
+2. Bấm FAB → dialog gồm `Spinner` (danh mục chi) + `EditText` (hạn mức).
+3. Lưu → tạo `Budget(categoryId, amount, "YYYY-MM", userId)` → `insert` (REPLACE nếu trùng).
+4. Danh sách hiển thị **đã chi / hạn mức**, % qua `ProgressBar`, và "Còn lại" hoặc "Vượt".
 
-#### TC-31: Đăng xuất
-- **Đầu vào:** Xác nhận đăng xuất
-- **Kết quả mong đợi:** Xóa session, chuyển về LoginActivity
-- **Kết quả thực tế:** ✅ PASS
+### 5.4. Xem thống kê
+1. Tab Thống kê → `StatisticsFragment`.
+2. `StatisticsViewModel` lấy `getCategorySummary(...)` của tháng đang chọn → vẽ **PieChart** + ListView tổng theo danh mục.
+3. Đồng thời lấy `getMonthlySummary(...)` → ListView lịch sử thu/chi/số dư theo từng tháng.
 
----
-
-## 4. KIỂM THỬ GIAO DIỆN (UI Testing)
-
-| Kiểm tra | Kết quả |
-|----------|---------|
-| Bottom Navigation hoạt động đúng | ✅ |
-| FAB (nút +) mở màn hình thêm giao dịch | ✅ |
-| DatePicker hiển thị đúng ngày đã chọn | ✅ |
-| Category grid hiển thị icon và màu sắc | ✅ |
-| RecyclerView cuộn mượt | ✅ |
-| Empty state hiển thị khi không có dữ liệu | ✅ |
-| Toast thông báo hiển thị đúng | ✅ |
-| Dialog xác nhận xóa/đăng xuất | ✅ |
+### 5.5. Xuất CSV
+1. Tab Cài đặt → "Xuất CSV".
+2. Observe toàn bộ giao dịch của người dùng → gọi `CsvExporter.exportTransactions(...)`.
+3. Ghi file `chi_tieu_YYYY-MM.csv` vào thư mục Downloads, có BOM để Excel đọc đúng tiếng Việt; báo Toast đường dẫn khi xong.
 
 ---
 
-## 5. KIỂM THỬ DATABASE
+## 6. Điểm nổi bật kỹ thuật
 
-| Kiểm tra | Kết quả |
-|----------|---------|
-| Tạo DB lần đầu, tự động thêm 13 danh mục mặc định | ✅ |
-| Foreign Key: Xóa Category → Transaction.categoryId = NULL | ✅ |
-| Foreign Key: Xóa Category → Budget bị xóa theo (CASCADE) | ✅ |
-| Unique constraint: Không tạo 2 budget cùng category + tháng | ✅ |
-| Query tổng thu/chi trả về 0 khi không có dữ liệu (COALESCE) | ✅ |
-| Singleton pattern đảm bảo chỉ 1 instance DB | ✅ |
-
----
-
-## 6. CÁC LỖI ĐÃ PHÁT HIỆN VÀ SỬA
-
-### 6.1 Lỗi đã sửa trong phiên này
-
-| # | Lỗi | Mức độ | Trạng thái |
-|---|-----|--------|------------|
-| 1 | **Memory leak BudgetFragment:** Tạo N LiveData observers trong vòng lặp, không tự giải phóng khi navigate | 🔴 Nghiêm trọng | ✅ Đã sửa |
-| 2 | **Logic balance ở Fragment:** `updateBalance()` tính toán trực tiếp trong UI layer, vi phạm MVVM | 🟡 Trung bình | ✅ Đã sửa |
-| 3 | **Không validate amount ≤ 0:** Người dùng có thể lưu giao dịch với số tiền âm hoặc bằng 0 | 🟡 Trung bình | ✅ Đã sửa |
-| 4 | **Mật khẩu lưu plain text:** Password lưu thẳng vào SQLite không qua mã hóa | 🔴 Bảo mật | ✅ Đã sửa |
-
-**Chi tiết cách sửa:**
-
-**Lỗi 1 — BudgetFragment Memory Leak:**
-- Thêm model `CategorySpent.java` để nhận kết quả query tổng hợp
-- Thêm query `getSpentPerCategory()` trong `TransactionDao` — lấy tổng chi tiêu tất cả danh mục trong 1 SQL query
-- Thêm method tương ứng trong `TransactionRepository`
-- `BudgetFragment` giờ chỉ có **1 observer** thay vì N observers (N = số lượng budget)
-
-**Lỗi 2 — Balance Logic:**
-- `HomeViewModel` thêm `MediatorLiveData<Double> balance`
-- Balance tự động tính lại mỗi khi `totalIncome` hoặc `totalExpense` thay đổi
-- `HomeFragment` xóa method `updateBalance()`, observe `viewModel.getBalance()` trực tiếp
-
-**Lỗi 3 — Validation Amount:**
-- Thêm kiểm tra `if (amount <= 0)` trong `saveTransaction()` của `AddEditTransactionActivity`
-- Hiển thị Toast "Số tiền phải lớn hơn 0"
-
-**Lỗi 4 — Hash mật khẩu:**
-- Tạo `PasswordUtils.java` với 2 method: `hash(password)` dùng SHA-256, `verify(plain, hashed)` để kiểm tra
-- `RegisterActivity`: hash mật khẩu trước khi tạo User object → lưu vào DB
-- `UserDao`: xóa query `login()` so sánh password trực tiếp trong SQL, thay bằng `getUserByEmailForLogin()` chỉ lấy theo email
-- `LoginActivity`: lấy user theo email, dùng `PasswordUtils.verify()` để so sánh hash ở tầng Java
+- **Tối ưu truy vấn gộp**: thay vì tạo N observer cho N danh mục, `getSpentPerCategory(...)` và `getCategorySummary(...)` dùng `GROUP BY` lấy tất cả trong **một query duy nhất** → giảm tải, ít observer, code gọn (`BudgetFragment`).
+- **Phản ứng dữ liệu thông minh**:
+  - `MediatorLiveData` tính số dư từ 2 nguồn thu/chi (`HomeViewModel`).
+  - `Transformations.switchMap` đổi nguồn dữ liệu theo bộ lọc/tháng đã chọn (`TransactionListViewModel`, `BudgetViewModel`, `StatisticsViewModel`).
+- **Bảo mật mật khẩu**: hash **SHA-256** bằng `MessageDigest` có sẵn (không thêm thư viện), không bao giờ lưu/đối chiếu plaintext.
+- **Đa người dùng cùng máy**: mọi truy vấn giao dịch/ngân sách đều lọc theo `userId` lấy từ phiên đăng nhập.
+- **Định dạng theo locale Việt Nam**: tiền tệ `#.###  ₫` (`CurrencyFormatter`), ngày tháng "dd/MM/yyyy", "Tháng MM/yyyy", nhãn "Hôm nay/Hôm qua" (`DateUtils`).
+- **Hiệu năng danh sách**: tất cả adapter ListView/GridView áp dụng **ViewHolder pattern** + cache danh mục (`Map<Long, Category>`) để tránh truy vấn lặp.
+- **Xử lý nền đúng cách**: mọi thao tác ghi DB chạy trên `databaseWriteExecutor` (thread pool 4), cập nhật UI qua `runOnUiThread`/LiveData → không chặn luồng chính.
+- **CSV thân thiện Excel**: ghi ký tự BOM `\uFEFF` và thay dấu phẩy trong ghi chú để không vỡ cột.
 
 ---
 
-### 6.2 Lỗi còn tồn tại (chưa sửa — ngoài phạm vi bài tập)
+## 7. Hạn chế & hướng cải tiến
 
-| # | Lỗi | Mức độ | Ghi chú |
-|---|-----|--------|---------|
-| 1 | `fallbackToDestructiveMigration()` xóa data khi nâng cấp DB | 🔴 Nghiêm trọng | Cần viết Migration thực sự |
-| 2 | `DecimalFormat` static không thread-safe | 🟡 Trung bình | Dùng ThreadLocal hoặc tạo mới mỗi lần |
-| 3 | Export CSV dùng API cũ, không hoạt động trên Android 10+ | 🟡 Trung bình | Cần dùng MediaStore API |
-| 4 | `AddEditTransactionActivity` tạo observer mới mỗi lần toggle type | 🟡 Nhỏ | Observer cũ không bị xóa |
-| 5 | `MonthlySummary.java` được định nghĩa nhưng không dùng | 🟢 Nhỏ | Dead code |
-
----
-
-## 7. ĐÁNH GIÁ TỔNG THỂ
-
-### 7.1 Điểm mạnh
-- Kiến trúc MVVM được áp dụng đúng và nhất quán
-- Room Database thiết kế tốt: Foreign Key, Index, COALESCE đúng chuẩn
-- UI Material Design hiện đại, có Dark Mode
-- Navigation Component quản lý màn hình gọn gàng
-- Phân tách rõ ràng giữa data layer và UI layer
-- Có đầy đủ validation input ở màn hình đăng ký
-
-### 7.2 Điểm cần cải thiện
-- Bảo mật mật khẩu (quan trọng nhất nếu deploy thực tế)
-- Chiến lược migration database khi nâng cấp version
-- Export CSV cần hỗ trợ Android 10+
-
-### 7.3 Bảng điểm tổng hợp
-
-| Hạng mục | Điểm trước | Điểm sau khi sửa |
-|----------|-----------|-----------------|
-| Kiến trúc tổng thể | 7/10 | **8/10** |
-| Chất lượng code | 6/10 | **7.5/10** |
-| Xử lý lỗi & Validation | 5/10 | **7/10** |
-| Hiệu năng (Memory) | 5/10 | **8/10** |
-| UI/UX | 7/10 | 7/10 |
-| Bảo mật | 3/10 | **7/10** |
-| **Tổng** | **5.5/10** | **7.4/10** |
+| Hạn chế hiện tại | Ảnh hưởng | Hướng cải tiến (giữ ràng buộc ListView/GridView) |
+|------------------|-----------|--------------------------------------------------|
+| Hash SHA-256 không có "salt" | Mật khẩu yếu dễ bị tấn công từ điển/rainbow table | Thêm salt ngẫu nhiên mỗi user, hoặc dùng PBKDF2/bcrypt (vẫn có sẵn trong JDK với PBKDF2) |
+| `fallbackToDestructiveMigration()` | Mất dữ liệu khi nâng version DB | Viết Migration thật sự khi đổi schema |
+| `loadCategories()` gọi `observe(this,...)` mỗi lần đổi loại | Có thể chồng nhiều observer trên cùng Activity | Tách `LiveData` cố định hoặc dùng `removeObservers` trước khi observe lại |
+| Tồn tại song song bản RecyclerView (`TransactionAdapter`, `BudgetAdapter`) không dùng | Dư thừa code | Gỡ bỏ để gọn, hoặc giữ làm tài liệu so sánh ListView vs RecyclerView |
+| Xuất CSV dùng `getExternalStoragePublicDirectory` | Lỗi thời với Android 10+ (Scoped Storage) | Dùng `MediaStore`/SAF để ghi vào Downloads đúng chuẩn mới |
+| Chưa có cảnh báo khi chi vượt ngân sách | Người dùng dễ bỏ lỡ | Thêm thông báo (Notification/Toast) khi % vượt ngưỡng |
+| Dark mode không lưu lựa chọn | Tắt app là mất | Lưu trạng thái dark mode vào SharedPreferences và áp dụng khi khởi động |
+| Chưa kiểm thử tự động | Khó đảm bảo chất lượng khi mở rộng | Thêm unit test cho `PasswordUtils`, `CurrencyFormatter`, `DateUtils` |
 
 ---
 
-## 8. KẾT LUẬN
+## 8. Bảng phân rã chức năng theo kiến thức môn học
 
-Ứng dụng **AppQuanLyChiTieu** là một bài tập Android hoàn chỉnh với đầy đủ tính năng cơ bản của một ứng dụng quản lý tài chính cá nhân. Kiến trúc MVVM được áp dụng đúng, code có cấu trúc rõ ràng và dễ đọc — phù hợp với trình độ học sinh mới học lập trình mobile.
-
-Sau khi sửa 3 lỗi trong phiên này, ứng dụng hoạt động ổn định hơn, không còn memory leak trong màn hình Budget, và dữ liệu giao dịch được validate chặt chẽ hơn.
-
-**Tổng số test case:** 31  
-**PASS:** 30  
-**CẦN KIỂM TRA THÊM:** 1 (TC-29: Export CSV trên Android 10+)  
-**FAIL:** 0
+| Chức năng | Màn hình / Class | Kiến thức Android áp dụng |
+|-----------|------------------|----------------------------|
+| Đăng ký tài khoản | `RegisterActivity`, `PasswordUtils` | Activity, validation, SHA-256, Room insert |
+| Đăng nhập & giữ phiên | `LoginActivity`, `SessionManager` | Activity, Intent, **SharedPreferences** |
+| Điều hướng giữa các tab | `MainActivity` | **Navigation Component**, **BottomNavigation**, Fragment |
+| Tổng quan số dư/thu/chi | `HomeFragment`, `HomeViewModel` | Fragment, **LiveData**, **MediatorLiveData** |
+| Danh sách giao dịch gần nhất | `HomeFragment`, `TransactionListAdapter` | **ListView + BaseAdapter**, ViewHolder |
+| Thêm/sửa giao dịch | `AddEditTransactionActivity` | Activity, **Intent + extras**, `DatePickerDialog`, ToggleGroup |
+| Chọn danh mục | `CategoryGridViewAdapter` | **GridView + BaseAdapter** |
+| Danh sách & lọc giao dịch | `TransactionListFragment`, `TransactionListViewModel` | Fragment, ListView, Chip, **switchMap**, AlertDialog |
+| Xóa giao dịch | `TransactionListFragment` | Long-click, `AlertDialog`, Room delete |
+| Đặt & theo dõi ngân sách | `BudgetFragment`, `BudgetListAdapter`, `BudgetViewModel` | ListView, `Spinner`, `ProgressBar`, switchMap |
+| Biểu đồ thống kê | `StatisticsFragment` | **MPAndroidChart (PieChart)**, ListView |
+| Lịch sử thu/chi theo tháng | `StatisticsFragment`, `StatisticsViewModel` | LiveData, truy vấn `GROUP BY` theo tháng |
+| Lưu trữ dữ liệu | `AppDatabase`, các DAO, các Entity | **Room/SQLite**, khóa chính/ngoại, index, TypeConverter |
+| Truy cập dữ liệu | `*Repository` | Repository pattern, `ExecutorService` |
+| Chế độ tối | `SettingsFragment` | `AppCompatDelegate` (Night Mode) |
+| Xuất CSV | `SettingsFragment`, `CsvExporter` | I/O file, `FileWriter`, luồng nền |
+| Đặt lại / Đăng xuất | `SettingsFragment`, `SessionManager` | AlertDialog, Room delete, SharedPreferences |
+| Định dạng tiền & ngày | `CurrencyFormatter`, `DateUtils` | `DecimalFormat`, `SimpleDateFormat`, `Locale` VN |
 
 ---
 
-*Báo cáo được tạo tự động dựa trên phân tích mã nguồn và kiểm thử tĩnh (static analysis).*  
-*Kiểm thử động (chạy trên thiết bị thực) cần thực hiện thêm để xác nhận hoàn toàn.*
+### Thông tin cấu hình kỹ thuật
+- `minSdk` 26, `targetSdk`/`compileSdk` 35, Java 11.
+- Thư viện chính: AndroidX AppCompat, Material Components, Room 2.6.1, Navigation 2.7.7, Lifecycle (ViewModel + LiveData) 2.7.0, MPAndroidChart v3.1.0.
+- Launcher: `LoginActivity`. Sau đăng nhập: `MainActivity` chứa 4 tab Fragment + màn thêm/sửa giao dịch.

@@ -57,7 +57,7 @@
         </LinearLayout>
 
         <!-- Budget List -->
-        <androidx.recyclerview.widget.RecyclerView
+        <ListView
             android:id="@+id/rv_budgets"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -65,7 +65,9 @@
             android:clipToPadding="false"
             android:paddingStart="@dimen/spacing_md"
             android:paddingEnd="@dimen/spacing_md"
-            android:paddingBottom="80dp" />
+            android:paddingBottom="80dp"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
 
         <!-- Empty State -->
         <TextView

@@ -169,13 +169,15 @@
             </LinearLayout>
 
             <!-- Recent Transactions List -->
-            <androidx.recyclerview.widget.RecyclerView
+            <ListView
                 android:id="@+id/rv_recent_transactions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
                 android:paddingStart="@dimen/spacing_md"
-                android:paddingEnd="@dimen/spacing_md" />
+                android:paddingEnd="@dimen/spacing_md"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:nestedScrollingEnabled="false" />
 
             <!-- Empty State -->
             <TextView

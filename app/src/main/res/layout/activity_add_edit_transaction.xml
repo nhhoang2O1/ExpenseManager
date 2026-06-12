@@ -130,13 +130,18 @@
             android:textSize="@dimen/text_subtitle"
             android:textStyle="bold" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <GridView
             android:id="@+id/rv_categories"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="160dp"
             android:layout_marginTop="@dimen/spacing_sm"
             android:paddingStart="@dimen/spacing_md"
-            android:paddingEnd="@dimen/spacing_md" />
+            android:paddingEnd="@dimen/spacing_md"
+            android:numColumns="3"
+            android:horizontalSpacing="8dp"
+            android:listSelector="@android:color/transparent"
+            android:verticalSpacing="8dp"
+            android:stretchMode="columnWidth" />
 
         <!-- Save Button -->
         <com.google.android.material.button.MaterialButton

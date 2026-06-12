@@ -1,22 +1,16 @@
 package com.example.appquanlychitieu.ui.transaction;
 
 import android.app.DatePickerDialog;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
-import com.example.appquanlychitieu.data.model.Category;
 import com.example.appquanlychitieu.data.model.Transaction;
 import com.example.appquanlychitieu.data.model.TransactionType;
 import com.example.appquanlychitieu.util.DateUtils;
@@ -26,12 +20,11 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
-import java.util.List;
 
 public class AddEditTransactionActivity extends AppCompatActivity {
     private TextInputEditText etAmount, etNote, etDate;
     private MaterialButtonToggleGroup toggleType;
-    private RecyclerView rvCategories;
+    private GridView gvCategories;
     private MaterialButton btnSave;
     private AppDatabase db;
 
@@ -40,7 +33,9 @@ public class AddEditTransactionActivity extends AppCompatActivity {
     private long selectedCategoryId = -1;
     private long editTransactionId = -1;
     private long userId;
-    private CategoryGridAdapter categoryAdapter;
+    private CategoryGridViewAdapter categoryAdapter;
+    private androidx.lifecycle.LiveData<List<Category>> categoryLiveData;
+    private androidx.lifecycle.Observer<List<Category>> categoryObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,27 +51,32 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         etNote = findViewById(R.id.et_note);
         etDate = findViewById(R.id.et_date);
         toggleType = findViewById(R.id.toggle_type);
-        rvCategories = findViewById(R.id.rv_categories);
+        gvCategories = findViewById(R.id.rv_categories);
         btnSave = findViewById(R.id.btn_save);
         ImageButton btnBack = findViewById(R.id.btn_back);
         TextView tvTitle = findViewById(R.id.tv_title);
 
-        // Set default date
+        // Ngày mặc định
         etDate.setText(DateUtils.formatDate(selectedDate));
 
-        // Setup category grid
-        categoryAdapter = new CategoryGridAdapter();
-        rvCategories.setLayoutManager(new GridLayoutManager(this, 4));
-        rvCategories.setAdapter(categoryAdapter);
+        // Setup GridView với BaseAdapter
+        categoryAdapter = new CategoryGridViewAdapter(this);
+        gvCategories.setAdapter(categoryAdapter);
 
-        // Check for edit mode
+        // Xử lý click chọn danh mục
+        categoryAdapter.setOnCategoryClickListener((category, position) -> {
+            selectedCategoryId = category.getId();
+            categoryAdapter.setSelectedPosition(position);
+        });
+
+        // Kiểm tra chế độ sửa
         editTransactionId = getIntent().getLongExtra("transaction_id", -1);
         if (editTransactionId != -1) {
             tvTitle.setText(R.string.edit_transaction);
             loadTransaction();
         }
 
-        // Type toggle
+        // Toggle loại giao dịch
         toggleType.check(R.id.btn_expense);
         toggleType.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
@@ -85,27 +85,24 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             }
         });
 
-        // Date picker
         etDate.setOnClickListener(v -> showDatePicker());
-
-        // Back button
         btnBack.setOnClickListener(v -> finish());
-
-        // Save button
         btnSave.setOnClickListener(v -> saveTransaction());
 
-        // Load categories
+        // Load danh mục lần đầu
         loadCategories();
     }
 
     private void loadCategories() {
-        db.categoryDao().getCategoriesByType(selectedType).observe(this, categories -> {
-            categoryAdapter.setCategories(categories);
-            categoryAdapter.setOnCategoryClickListener((category, position) -> {
-                selectedCategoryId = category.getId();
-                categoryAdapter.setSelectedPosition(position);
-            });
-        });
+        // Remove observer cũ nếu có
+        if (categoryLiveData != null && categoryObserver != null) {
+            categoryLiveData.removeObserver(categoryObserver);
+        }
+        
+        // Tạo observer mới và observe
+        categoryLiveData = db.categoryDao().getCategoriesByType(selectedType);
+        categoryObserver = categories -> categoryAdapter.setCategories(categories);
+        categoryLiveData.observe(this, categoryObserver);
     }
 
     private void loadTransaction() {
@@ -156,7 +153,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             return;
         }
 
-        // Không cho phép nhập số âm hoặc bằng 0
         if (amount <= 0) {
             Toast.makeText(this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
             return;
@@ -181,103 +177,14 @@ public class AddEditTransactionActivity extends AppCompatActivity {
                     db.transactionDao().update(transaction);
                 }
             } else {
-                Transaction transaction = new Transaction(amount, note, selectedDate, selectedCategoryId, selectedType, userId);
+                Transaction transaction = new Transaction(amount, note, selectedDate,
+                        selectedCategoryId, selectedType, userId);
                 db.transactionDao().insert(transaction);
             }
-
             runOnUiThread(() -> {
                 Toast.makeText(this, R.string.transaction_saved, Toast.LENGTH_SHORT).show();
                 finish();
             });
         });
-    }
-
-    // Inner adapter for category grid
-    static class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapter.ViewHolder> {
-        private List<Category> categories;
-        private int selectedPosition = -1;
-        private OnCategoryClickListener listener;
-
-        interface OnCategoryClickListener {
-            void onCategoryClick(Category category, int position);
-        }
-
-        void setOnCategoryClickListener(OnCategoryClickListener listener) {
-            this.listener = listener;
-        }
-
-        void setCategories(List<Category> categories) {
-            this.categories = categories;
-            selectedPosition = -1;
-            notifyDataSetChanged();
-        }
-
-        void setSelectedPosition(int position) {
-            int old = selectedPosition;
-            selectedPosition = position;
-            if (old != -1) notifyItemChanged(old);
-            notifyItemChanged(position);
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
-            View view = android.view.LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_category_grid, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            Category category = categories.get(position);
-            holder.tvName.setText(category.getName());
-
-            // Icon
-            int iconRes = TransactionAdapter.getIconResource(holder.itemView.getContext(), category.getIcon());
-            if (iconRes != 0) {
-                holder.ivIcon.setImageResource(iconRes);
-            }
-
-            // Background color
-            try {
-                int color = Color.parseColor(category.getColor());
-                GradientDrawable bg = new GradientDrawable();
-                bg.setShape(GradientDrawable.OVAL);
-                bg.setColor(color);
-                holder.viewIconBg.setBackground(bg);
-            } catch (Exception ignored) {}
-
-            // Selection indicator
-            if (position == selectedPosition) {
-                holder.itemView.setAlpha(1.0f);
-                holder.itemView.setScaleX(1.1f);
-                holder.itemView.setScaleY(1.1f);
-            } else {
-                holder.itemView.setAlpha(0.7f);
-                holder.itemView.setScaleX(1.0f);
-                holder.itemView.setScaleY(1.0f);
-            }
-
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) listener.onCategoryClick(category, position);
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return categories != null ? categories.size() : 0;
-        }
-
-        static class ViewHolder extends RecyclerView.ViewHolder {
-            View viewIconBg;
-            ImageView ivIcon;
-            TextView tvName;
-
-            ViewHolder(View itemView) {
-                super(itemView);
-                viewIconBg = itemView.findViewById(R.id.view_icon_bg);
-                ivIcon = itemView.findViewById(R.id.iv_icon);
-                tvName = itemView.findViewById(R.id.tv_name);
-            }
-        }
     }
 }

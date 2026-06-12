@@ -1,0 +1,134 @@
+package com.example.appquanlychitieu.ui.transaction;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.appquanlychitieu.R;
+import com.example.appquanlychitieu.data.model.Category;
+import com.example.appquanlychitieu.data.model.Transaction;
+import com.example.appquanlychitieu.data.model.TransactionType;
+import com.example.appquanlychitieu.util.CurrencyFormatter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * BaseAdapter cho ListView hiển thị danh sách giao dịch.
+ */
+public class TransactionListAdapter extends BaseAdapter {
+
+    private final Context context;
+    private List<Transaction> transactions = new ArrayList<>();
+    private Map<Long, Category> categoryCache = new HashMap<>();
+
+    // Interface callback click
+    public interface OnItemClickListener {
+        void onClick(Transaction transaction);
+        void onLongClick(Transaction transaction);
+    }
+
+    private OnItemClickListener listener;
+
+    public TransactionListAdapter(Context context) {
+        this.context = context;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+        notifyDataSetChanged();
+    }
+
+    public void setCategoryCache(Map<Long, Category> cache) {
+        this.categoryCache = cache;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getCount() { return transactions.size(); }
+
+    @Override
+    public Transaction getItem(int position) { return transactions.get(position); }
+
+    @Override
+    public long getItemId(int position) { return transactions.get(position).getId(); }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
+
+        // View Holder Pattern — tái sử dụng view để tăng hiệu năng
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.item_transaction, parent, false);
+            holder = new ViewHolder(convertView);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        Transaction transaction = transactions.get(position);
+        Category category = categoryCache.get(transaction.getCategoryId());
+
+        // Ghi chú
+        String note = transaction.getNote();
+        holder.tvNote.setText(note != null && !note.isEmpty() ? note : (category != null ? category.getName() : ""));
+
+        // Tên danh mục
+        holder.tvCategory.setText(category != null ? category.getName() : "");
+
+        // Số tiền
+        boolean isExpense = transaction.getType() == TransactionType.EXPENSE;
+        holder.tvAmount.setText(CurrencyFormatter.formatWithSign(transaction.getAmount(), isExpense));
+        holder.tvAmount.setTextColor(context.getColor(isExpense ? R.color.expense_color : R.color.income_color));
+
+        // Icon và màu danh mục
+        if (category != null) {
+            int iconResId = TransactionAdapter.getIconResource(context, category.getIcon());
+            if (iconResId != 0) holder.ivCategoryIcon.setImageResource(iconResId);
+
+            try {
+                int color = Color.parseColor(category.getColor());
+                GradientDrawable bg = new GradientDrawable();
+                bg.setShape(GradientDrawable.OVAL);
+                bg.setColor(color);
+                holder.viewIconBg.setBackground(bg);
+            } catch (Exception ignored) {}
+        }
+
+        // Click listener
+        final Transaction t = transaction;
+        convertView.setOnClickListener(v -> { if (listener != null) listener.onClick(t); });
+        convertView.setOnLongClickListener(v -> {
+            if (listener != null) listener.onLongClick(t);
+            return true;
+        });
+
+        return convertView;
+    }
+
+    static class ViewHolder {
+        View viewIconBg;
+        ImageView ivCategoryIcon;
+        TextView tvNote, tvCategory, tvAmount;
+
+        ViewHolder(View view) {
+            viewIconBg = view.findViewById(R.id.view_icon_bg);
+            ivCategoryIcon = view.findViewById(R.id.iv_category_icon);
+            tvNote = view.findViewById(R.id.tv_note);
+            tvCategory = view.findViewById(R.id.tv_category);
+            tvAmount = view.findViewById(R.id.tv_amount);
+        }
+    }
+}
