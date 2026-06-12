@@ -95,7 +95,7 @@ public class TransactionListAdapter extends BaseAdapter {
 
         // Icon và màu danh mục
         if (category != null) {
-            int iconResId = TransactionAdapter.getIconResource(context, category.getIcon());
+            int iconResId = getIconResource(category.getIcon());
             if (iconResId != 0) holder.ivCategoryIcon.setImageResource(iconResId);
 
             try {
@@ -116,6 +116,11 @@ public class TransactionListAdapter extends BaseAdapter {
         });
 
         return convertView;
+    }
+
+    private int getIconResource(String iconName) {
+        if (iconName == null) return 0;
+        return context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
     }
 
     static class ViewHolder {

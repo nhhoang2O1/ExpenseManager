@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.model.CategorySummary;
 import com.example.appquanlychitieu.data.model.MonthlySummary;
-import com.example.appquanlychitieu.ui.transaction.TransactionAdapter;
 import com.example.appquanlychitieu.util.CurrencyFormatter;
 import com.example.appquanlychitieu.util.DateUtils;
 import com.github.mikephil.charting.charts.PieChart;
@@ -164,11 +163,16 @@ public class StatisticsFragment extends Fragment {
                 viewIconBg.setBackground(bg);
             } catch (Exception ignored) {}
 
-            int iconRes = TransactionAdapter.getIconResource(requireContext(), s.getCategoryIcon());
+            int iconRes = getIconResource(s.getCategoryIcon());
             if (iconRes != 0) ivIcon.setImageResource(iconRes);
 
             return convertView;
         }
+    }
+
+    private int getIconResource(String iconName) {
+        if (iconName == null) return 0;
+        return requireContext().getResources().getIdentifier(iconName, "drawable", requireContext().getPackageName());
     }
 
     // BaseAdapter cho ListView lịch sử tài chính

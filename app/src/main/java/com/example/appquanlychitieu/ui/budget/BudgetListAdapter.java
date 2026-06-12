@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.model.Budget;
 import com.example.appquanlychitieu.data.model.Category;
-import com.example.appquanlychitieu.ui.transaction.TransactionAdapter;
 import com.example.appquanlychitieu.util.CurrencyFormatter;
 
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class BudgetListAdapter extends BaseAdapter {
         // Thông tin danh mục
         if (category != null) {
             holder.tvCategoryName.setText(category.getName());
-            int iconRes = TransactionAdapter.getIconResource(context, category.getIcon());
+            int iconRes = getIconResource(category.getIcon());
             if (iconRes != 0) holder.ivCategoryIcon.setImageResource(iconRes);
 
             try {
@@ -111,6 +110,11 @@ public class BudgetListAdapter extends BaseAdapter {
         }
 
         return convertView;
+    }
+
+    private int getIconResource(String iconName) {
+        if (iconName == null) return 0;
+        return context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
     }
 
     static class ViewHolder {

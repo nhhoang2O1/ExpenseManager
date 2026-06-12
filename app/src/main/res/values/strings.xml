@@ -20,7 +20,6 @@
     <!-- Transaction -->
     <string name="add_transaction">Thêm giao dịch</string>
     <string name="edit_transaction">Sửa giao dịch</string>
-    <string name="delete_transaction">Xóa giao dịch</string>
     <string name="transaction_amount">Số tiền</string>
     <string name="transaction_note">Ghi chú</string>
     <string name="transaction_date">Ngày</string>
@@ -37,35 +36,21 @@
     <!-- Statistics -->
     <string name="statistics_title">Thống kê</string>
     <string name="expense_by_category">Chi tiêu theo danh mục</string>
-    <string name="income_by_category">Thu nhập theo danh mục</string>
-    <string name="monthly_overview">Tổng quan theo tháng</string>
     <string name="no_data">Chưa có dữ liệu</string>
 
     <!-- Budget -->
     <string name="budget_title">Ngân sách</string>
     <string name="add_budget">Thêm ngân sách</string>
-    <string name="budget_amount">Hạn mức</string>
-    <string name="budget_spent">Đã chi</string>
     <string name="budget_remaining">Còn lại</string>
     <string name="budget_exceeded">Vượt hạn mức!</string>
     <string name="no_budget">Chưa có ngân sách</string>
 
     <!-- Settings -->
     <string name="settings_title">Cài đặt</string>
-    <string name="manage_categories">Quản lý danh mục</string>
-    <string name="export_csv">Xuất file CSV</string>
     <string name="dark_mode">Chế độ tối</string>
-    <string name="about">Về ứng dụng</string>
     <string name="app_version">Phiên bản 1.0</string>
     <string name="reset_data">Xóa toàn bộ dữ liệu</string>
     <string name="confirm_reset">Bạn có chắc muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.</string>
-
-    <!-- Category -->
-    <string name="category_management">Quản lý danh mục</string>
-    <string name="add_category">Thêm danh mục</string>
-    <string name="category_name">Tên danh mục</string>
-    <string name="select_icon">Chọn biểu tượng</string>
-    <string name="select_color">Chọn màu</string>
 
     <!-- Default Categories - Expense -->
     <string name="cat_food">Ăn uống</string>
@@ -84,24 +69,12 @@
     <string name="cat_invest">Đầu tư</string>
     <string name="cat_freelance">Làm thêm</string>
 
-    <!-- Currency -->
-    <string name="currency_symbol">₫</string>
-    <string name="amount_format">%s ₫</string>
-
     <!-- Common -->
-    <string name="ok">OK</string>
     <string name="yes">Có</string>
     <string name="no">Không</string>
-    <string name="error">Lỗi</string>
     <string name="success">Thành công</string>
-    <string name="loading">Đang tải...</string>
-    <string name="search">Tìm kiếm</string>
-    <string name="filter">Lọc</string>
     <string name="all">Tất cả</string>
     <string name="please_enter_amount">Vui lòng nhập số tiền</string>
     <string name="please_select_category">Vui lòng chọn danh mục</string>
     <string name="transaction_saved">Đã lưu giao dịch</string>
-    <string name="transaction_deleted">Đã xóa giao dịch</string>
-    <string name="export_success">Xuất CSV thành công</string>
-    <string name="export_failed">Xuất CSV thất bại</string>
 </resources>
