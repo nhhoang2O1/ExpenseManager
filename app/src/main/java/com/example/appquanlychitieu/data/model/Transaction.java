@@ -19,13 +19,13 @@ public class Transaction {
     private double amount;
     private String note;
     private long date; // timestamp in millis
-    private long categoryId;
+    private Long categoryId; // Đổi thành Long để có thể null
     private TransactionType type;
     private long userId;
 
     public Transaction() {}
 
-    public Transaction(double amount, String note, long date, long categoryId, TransactionType type, long userId) {
+    public Transaction(double amount, String note, long date, Long categoryId, TransactionType type, long userId) {
         this.amount = amount;
         this.note = note;
         this.date = date;
@@ -47,8 +47,8 @@ public class Transaction {
     public long getDate() { return date; }
     public void setDate(long date) { this.date = date; }
 
-    public long getCategoryId() { return categoryId; }
-    public void setCategoryId(long categoryId) { this.categoryId = categoryId; }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
     public TransactionType getType() { return type; }
     public void setType(TransactionType type) { this.type = type; }

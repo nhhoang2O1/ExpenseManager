@@ -40,6 +40,8 @@ public class BudgetFragment extends Fragment {
     private TransactionRepository transactionRepository;
     private List<Category> expenseCategories = new ArrayList<>();
     private androidx.lifecycle.Observer<List<Category>> categoriesObserver;
+    private androidx.lifecycle.LiveData<List<CategorySpent>> spentLiveData;
+    private androidx.lifecycle.Observer<List<CategorySpent>> spentObserver;
 
     @Nullable
     @Override
@@ -90,22 +92,31 @@ public class BudgetFragment extends Fragment {
             }
         });
 
+        // Tạo observer cho spent data
+        spentObserver = spentList -> {
+            Map<Long, Double> spentMap = new HashMap<>();
+            if (spentList != null) {
+                for (CategorySpent item : spentList)
+                    spentMap.put(item.categoryId, item.spent);
+            }
+            adapter.setSpentMap(spentMap);
+        };
+
         // Chi tiêu theo danh mục - observe tháng và update spent map
         viewModel.getSelectedMonthYear().observe(getViewLifecycleOwner(), monthYear -> {
             tvCurrentMonth.setText(DateUtils.formatDisplayMonth(
                     DateUtils.getStartOfMonth(monthYear[0], monthYear[1])));
             
+            // Remove observer cũ nếu có
+            if (spentLiveData != null) {
+                spentLiveData.removeObserver(spentObserver);
+            }
+            
+            // Tạo LiveData mới và observe
             long start = DateUtils.getStartOfMonth(monthYear[0], monthYear[1]);
             long end = DateUtils.getEndOfMonth(monthYear[0], monthYear[1]);
-            transactionRepository.getSpentPerCategory(viewModel.getUserId(), start, end)
-                    .observe(getViewLifecycleOwner(), spentList -> {
-                        Map<Long, Double> spentMap = new HashMap<>();
-                        if (spentList != null) {
-                            for (CategorySpent item : spentList)
-                                spentMap.put(item.categoryId, item.spent);
-                        }
-                        adapter.setSpentMap(spentMap);
-                    });
+            spentLiveData = transactionRepository.getSpentPerCategory(viewModel.getUserId(), start, end);
+            spentLiveData.observe(getViewLifecycleOwner(), spentObserver);
         });
 
         btnPrev.setOnClickListener(v -> viewModel.previousMonth());

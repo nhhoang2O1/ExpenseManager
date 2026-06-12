@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
+import com.example.appquanlychitieu.data.model.Category;
 import com.example.appquanlychitieu.data.model.Transaction;
 import com.example.appquanlychitieu.data.model.TransactionType;
 import com.example.appquanlychitieu.util.DateUtils;
@@ -20,6 +21,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
+import java.util.List;
 
 public class AddEditTransactionActivity extends AppCompatActivity {
     private TextInputEditText etAmount, etNote, etDate;
@@ -115,7 +117,7 @@ public class AddEditTransactionActivity extends AppCompatActivity {
                     selectedDate = transaction.getDate();
                     etDate.setText(DateUtils.formatDate(selectedDate));
                     selectedType = transaction.getType();
-                    selectedCategoryId = transaction.getCategoryId();
+                    selectedCategoryId = transaction.getCategoryId() != null ? transaction.getCategoryId() : -1;
 
                     if (selectedType == TransactionType.INCOME) {
                         toggleType.check(R.id.btn_income);
