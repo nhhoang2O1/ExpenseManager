@@ -47,6 +47,17 @@ public class CategoryGridViewAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void setSelectedCategoryId(long id) {
+        selectedPosition = -1;
+        for (int i = 0; i < categories.size(); i++) {
+            if (categories.get(i).getId() == id) {
+                selectedPosition = i;
+                break;
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() { return categories.size(); }
 

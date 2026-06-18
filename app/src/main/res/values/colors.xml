@@ -23,6 +23,7 @@
     <color name="income_bg">#E8F5E9</color>
     <color name="expense_color">#C62828</color>
     <color name="expense_bg">#FFEBEE</color>
+    <color name="budget_color">#1565C0</color>
 
     <!-- Balance Card Gradient -->
     <color name="balance_gradient_start">#1B5E20</color>

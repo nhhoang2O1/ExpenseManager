@@ -25,9 +25,9 @@
 
     <fragment
         android:id="@+id/navigation_budget"
-        android:name="com.example.appquanlychitieu.ui.budget.BudgetFragment"
+        android:name="com.example.appquanlychitieu.ui.goals.GoalFragment"
         android:label="@string/nav_budget"
-        tools:layout="@layout/fragment_budget" />
+        tools:layout="@layout/fragment_goals" />
 
     <fragment
         android:id="@+id/navigation_settings"

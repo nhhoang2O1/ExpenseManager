@@ -19,6 +19,7 @@
     <color name="income_bg">#17351F</color>
     <color name="expense_color">#EF9A9A</color>
     <color name="expense_bg">#3A1D1D</color>
+    <color name="budget_color">#64B5F6</color>
 
     <color name="balance_gradient_start">#1B5E20</color>
     <color name="balance_gradient_end">#388E3C</color>

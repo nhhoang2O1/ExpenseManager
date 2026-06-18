@@ -33,6 +33,9 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE userId = :userId AND type = :type ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsByType(long userId, TransactionType type);
 
+    @Query("SELECT * FROM transactions WHERE userId = :userId AND type = :type AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    LiveData<List<Transaction>> getTransactionsByTypeAndDateRange(long userId, TransactionType type, long startDate, long endDate);
+
     @Query("SELECT * FROM transactions WHERE userId = :userId AND categoryId = :categoryId ORDER BY date DESC")
     LiveData<List<Transaction>> getTransactionsByCategory(long userId, long categoryId);
 

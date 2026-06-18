@@ -34,7 +34,7 @@ public class StatisticsFragment extends Fragment {
     private StatisticsViewModel viewModel;
     private PieChart pieChart;
     private TextView tvCurrentMonth, tvEmpty, tvHistoryEmpty;
-    private ListView lvCategorySummary, lvMonthlyHistory;
+    private android.widget.LinearLayout layoutCategorySummary, layoutMonthlyHistory;
 
     @Nullable
     @Override
@@ -50,8 +50,8 @@ public class StatisticsFragment extends Fragment {
         tvCurrentMonth = view.findViewById(R.id.tv_current_month);
         tvEmpty = view.findViewById(R.id.tv_empty);
         tvHistoryEmpty = view.findViewById(R.id.tv_history_empty);
-        lvCategorySummary = view.findViewById(R.id.rv_category_summary);
-        lvMonthlyHistory = view.findViewById(R.id.rv_monthly_history);
+        layoutCategorySummary = view.findViewById(R.id.layout_category_summary);
+        layoutMonthlyHistory = view.findViewById(R.id.layout_monthly_history);
         ImageButton btnPrev = view.findViewById(R.id.btn_prev_month);
         ImageButton btnNext = view.findViewById(R.id.btn_next_month);
 
@@ -70,13 +70,20 @@ public class StatisticsFragment extends Fragment {
         viewModel.getCategorySummary().observe(getViewLifecycleOwner(), summaries -> {
             if (summaries != null && !summaries.isEmpty()) {
                 updatePieChart(summaries);
-                lvCategorySummary.setAdapter(new CategorySummaryAdapter(summaries));
+                
+                CategorySummaryAdapter adapter = new CategorySummaryAdapter(summaries);
+                layoutCategorySummary.removeAllViews();
+                for (int i = 0; i < adapter.getCount(); i++) {
+                    View itemView = adapter.getView(i, null, layoutCategorySummary);
+                    layoutCategorySummary.addView(itemView);
+                }
+                
                 pieChart.setVisibility(View.VISIBLE);
-                lvCategorySummary.setVisibility(View.VISIBLE);
+                layoutCategorySummary.setVisibility(View.VISIBLE);
                 tvEmpty.setVisibility(View.GONE);
             } else {
                 pieChart.setVisibility(View.GONE);
-                lvCategorySummary.setVisibility(View.GONE);
+                layoutCategorySummary.setVisibility(View.GONE);
                 tvEmpty.setVisibility(View.VISIBLE);
             }
         });
@@ -84,11 +91,17 @@ public class StatisticsFragment extends Fragment {
         // Observe lịch sử tài chính
         viewModel.getMonthlySummary().observe(getViewLifecycleOwner(), summaries -> {
             if (summaries != null && !summaries.isEmpty()) {
-                lvMonthlyHistory.setAdapter(new MonthlySummaryAdapter(summaries));
-                lvMonthlyHistory.setVisibility(View.VISIBLE);
+                MonthlySummaryAdapter adapter = new MonthlySummaryAdapter(summaries);
+                layoutMonthlyHistory.removeAllViews();
+                for (int i = 0; i < adapter.getCount(); i++) {
+                    View itemView = adapter.getView(i, null, layoutMonthlyHistory);
+                    layoutMonthlyHistory.addView(itemView);
+                }
+                
+                layoutMonthlyHistory.setVisibility(View.VISIBLE);
                 tvHistoryEmpty.setVisibility(View.GONE);
             } else {
-                lvMonthlyHistory.setVisibility(View.GONE);
+                layoutMonthlyHistory.setVisibility(View.GONE);
                 tvHistoryEmpty.setVisibility(View.VISIBLE);
             }
         });

@@ -7,21 +7,26 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.appquanlychitieu.MainActivity;
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.model.User;
 import com.example.appquanlychitieu.util.PasswordUtils;
+import com.example.appquanlychitieu.util.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPassword, etConfirmPassword;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        sessionManager = new SessionManager(this);
 
         etName = findViewById(R.id.et_name);
         etEmail = findViewById(R.id.et_email);
@@ -89,11 +94,18 @@ public class RegisterActivity extends AppCompatActivity {
             // Tạo user mới — hash mật khẩu trước khi lưu vào database
             String hashedPassword = PasswordUtils.hash(password);
             User user = new User(name, email, hashedPassword);
-            db.userDao().insert(user);
+            long userId = db.userDao().insert(user);
 
             runOnUiThread(() -> {
-                Toast.makeText(this, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
-                finish(); // Quay lại LoginActivity
+                // Tự động đăng nhập sau khi đăng ký thành công
+                sessionManager.createLoginSession(userId, name, email);
+                Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                
+                // Chuyển đến MainActivity
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             });
         });
     }

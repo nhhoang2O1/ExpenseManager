@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Bar chart with 3 columns representing budget/goals -->
+
+    <!-- Left bar (short) -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:pathData="M2,20 L2,15 L6,15 L6,20 Z" />
+
+    <!-- Middle bar (tall) -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:pathData="M9,20 L9,9 L13,9 L13,20 Z" />
+
+    <!-- Right bar (medium) -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:pathData="M16,20 L16,12 L20,12 L20,20 Z" />
+
+    <!-- Base line -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:pathData="M1,21 L23,21 L23,22 L1,22 Z" />
+
+    <!-- Target/goal ring above middle bar: outer circle r=3 at (11,5), inner r=1.5 -->
+    <!-- Uses evenOdd fill to punch hole in center -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:fillType="evenOdd"
+        android:pathData="M11,2 A3,3,0,1,0,11,8 A3,3,0,1,0,11,2 Z M11,3.5 A1.5,1.5,0,1,1,11,6.5 A1.5,1.5,0,1,1,11,3.5 Z" />
+
+</vector>

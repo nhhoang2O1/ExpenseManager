@@ -5,7 +5,7 @@
     <string name="nav_home">Tổng quan</string>
     <string name="nav_transactions">Giao dịch</string>
     <string name="nav_statistics">Thống kê</string>
-    <string name="nav_budget">Ngân sách</string>
+    <string name="nav_budget">Mục tiêu</string>
     <string name="nav_settings">Cài đặt</string>
 
     <!-- Home -->
@@ -16,6 +16,7 @@
     <string name="see_all">Xem tất cả</string>
     <string name="this_month">Tháng này</string>
     <string name="no_transactions">Chưa có giao dịch nào</string>
+    <string name="quick_action_budget">Lên ngân sách</string>
 
     <!-- Transaction -->
     <string name="add_transaction">Thêm giao dịch</string>
@@ -77,4 +78,19 @@
     <string name="please_enter_amount">Vui lòng nhập số tiền</string>
     <string name="please_select_category">Vui lòng chọn danh mục</string>
     <string name="transaction_saved">Đã lưu giao dịch</string>
+
+    <!-- Empty State — Home -->
+    <string name="empty_home_title">Hành trình tiết kiệm bắt đầu từ đây!</string>
+    <string name="empty_home_desc">Hãy ghi lại giao dịch chi tiêu hoặc thu nhập đầu tiên của bạn để chúng tôi giúp bạn thống kê nhé.</string>
+    <string name="empty_home_cta">+ Thêm giao dịch đầu tiên</string>
+
+    <!-- Empty State — Transaction List -->
+    <string name="empty_transaction_title">Chưa có giao dịch nào</string>
+    <string name="empty_transaction_desc">Bắt đầu theo dõi tài chính bằng cách thêm giao dịch đầu tiên của bạn.</string>
+    <string name="empty_transaction_cta">+ Thêm giao dịch</string>
+
+    <!-- Empty State — Budget -->
+    <string name="empty_budget_title">Chưa có ngân sách nào</string>
+    <string name="empty_budget_desc">Thiết lập ngân sách để kiểm soát chi tiêu hiệu quả hơn mỗi tháng.</string>
+    <string name="empty_budget_cta">+ Thiết lập ngân sách ngay</string>
 </resources>

@@ -29,7 +29,7 @@ public class SessionManager {
         editor.putLong(KEY_USER_ID, userId);
         editor.putString(KEY_USER_NAME, name);
         editor.putString(KEY_USER_EMAIL, email);
-        editor.apply();
+        editor.commit(); // Dùng commit() thay vì apply() để đảm bảo lưu ngay lập tức
     }
 
     /**

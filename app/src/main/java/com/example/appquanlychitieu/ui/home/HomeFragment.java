@@ -18,20 +18,24 @@ import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.data.model.Category;
 import com.example.appquanlychitieu.data.model.Transaction;
+import com.example.appquanlychitieu.data.model.TransactionType;
 import com.example.appquanlychitieu.ui.transaction.AddEditTransactionActivity;
 import com.example.appquanlychitieu.ui.transaction.TransactionListAdapter;
 import com.example.appquanlychitieu.util.CurrencyFormatter;
 import com.example.appquanlychitieu.util.DateUtils;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel viewModel;
     private TransactionListAdapter adapter;
-    private TextView tvBalance, tvIncome, tvExpense, tvMonthYear, tvEmpty;
-    private ListView lvRecentTransactions;
+    private TextView tvBalance, tvIncome, tvExpense, tvMonthYear;
+    private android.widget.LinearLayout layoutRecentTransactions;
+    private View layoutEmptyState;
 
     @Nullable
     @Override
@@ -47,16 +51,23 @@ public class HomeFragment extends Fragment {
         tvIncome = view.findViewById(R.id.tv_income);
         tvExpense = view.findViewById(R.id.tv_expense);
         tvMonthYear = view.findViewById(R.id.tv_month_year);
-        tvEmpty = view.findViewById(R.id.tv_empty);
-        lvRecentTransactions = view.findViewById(R.id.rv_recent_transactions);
-        FloatingActionButton fabAdd = view.findViewById(R.id.fab_add);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        android.widget.Button btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
+        layoutRecentTransactions = view.findViewById(R.id.layout_recent_transactions);
+        MaterialButton btnQuickIncome = view.findViewById(R.id.btn_quick_income);
+        MaterialButton btnQuickExpense = view.findViewById(R.id.btn_quick_expense);
+        MaterialButton btnQuickReminder = view.findViewById(R.id.btn_quick_reminder);
         TextView tvSeeAll = view.findViewById(R.id.tv_see_all);
 
-        tvMonthYear.setText(DateUtils.formatDisplayMonth(System.currentTimeMillis()));
+        String currentDateLabel = "Hôm nay, " + DateUtils.formatDate(System.currentTimeMillis());
+        tvMonthYear.setText(currentDateLabel);
 
-        // Setup ListView với BaseAdapter
+        ((TextView) view.findViewById(R.id.tv_empty_title)).setText(R.string.empty_home_title);
+        ((TextView) view.findViewById(R.id.tv_empty_desc)).setText(R.string.empty_home_desc);
+        btnEmptyCta.setText(R.string.empty_home_cta);
+
+        // Setup adapter
         adapter = new TransactionListAdapter(requireContext());
-        lvRecentTransactions.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -66,6 +77,7 @@ public class HomeFragment extends Fragment {
             Map<Long, Category> cache = new HashMap<>();
             for (Category c : categories) cache.put(c.getId(), c);
             adapter.setCategoryCache(cache);
+            updateRecentTransactionsList(viewModel.getRecentTransactions().getValue());
         });
 
         // Observe thu nhập
@@ -84,33 +96,50 @@ public class HomeFragment extends Fragment {
         });
 
         // Observe giao dịch gần nhất
-        viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), transactions -> {
-            if (transactions != null && !transactions.isEmpty()) {
-                adapter.setTransactions(transactions);
-                lvRecentTransactions.setVisibility(View.VISIBLE);
-                tvEmpty.setVisibility(View.GONE);
-            } else {
-                lvRecentTransactions.setVisibility(View.GONE);
-                tvEmpty.setVisibility(View.VISIBLE);
+        viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::updateRecentTransactionsList);
+
+        btnQuickIncome.setOnClickListener(v -> openAddTransaction(TransactionType.INCOME));
+        btnQuickExpense.setOnClickListener(v -> openAddTransaction(TransactionType.EXPENSE));
+        btnQuickReminder.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), com.example.appquanlychitieu.ui.reminder.ReminderActivity.class);
+            startActivity(intent);
+        });
+        btnEmptyCta.setOnClickListener(v -> openAddTransaction(TransactionType.EXPENSE));
+
+        tvSeeAll.setOnClickListener(v -> {
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+            if (bottomNav != null) {
+                bottomNav.setSelectedItemId(R.id.navigation_transactions);
             }
         });
+    }
 
-        // Click item trong ListView
-        adapter.setOnItemClickListener(new TransactionListAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(Transaction transaction) {
-                Intent intent = new Intent(requireContext(), AddEditTransactionActivity.class);
-                intent.putExtra("transaction_id", transaction.getId());
-                startActivity(intent);
+    private void updateRecentTransactionsList(List<Transaction> transactions) {
+        if (layoutRecentTransactions == null) return;
+        adapter.setTransactions(transactions != null ? transactions : new java.util.ArrayList<>());
+        layoutRecentTransactions.removeAllViews();
+        if (transactions != null && !transactions.isEmpty()) {
+            for (int i = 0; i < transactions.size(); i++) {
+                View itemView = adapter.getView(i, null, layoutRecentTransactions);
+                final Transaction transaction = transactions.get(i);
+                itemView.setOnClickListener(v -> {
+                    Intent intent = new Intent(requireContext(), AddEditTransactionActivity.class);
+                    intent.putExtra("transaction_id", transaction.getId());
+                    startActivity(intent);
+                });
+                layoutRecentTransactions.addView(itemView);
             }
-            @Override
-            public void onLongClick(Transaction transaction) { }
-        });
+            layoutRecentTransactions.setVisibility(View.VISIBLE);
+            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.GONE);
+        } else {
+            layoutRecentTransactions.setVisibility(View.GONE);
+            if (layoutEmptyState != null) layoutEmptyState.setVisibility(View.VISIBLE);
+        }
+    }
 
-        fabAdd.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), AddEditTransactionActivity.class)));
-
-        tvSeeAll.setOnClickListener(v ->
-                Navigation.findNavController(view).navigate(R.id.navigation_transactions));
+    private void openAddTransaction(TransactionType type) {
+        Intent intent = new Intent(requireContext(), AddEditTransactionActivity.class);
+        intent.putExtra(AddEditTransactionActivity.EXTRA_TRANSACTION_TYPE, type.name());
+        startActivity(intent);
     }
 }

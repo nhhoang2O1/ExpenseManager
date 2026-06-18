@@ -24,7 +24,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Transaction.class, Category.class, Budget.class, User.class}, version = 3, exportSchema = false)
+import com.example.appquanlychitieu.data.database.dao.GoalDao;
+import com.example.appquanlychitieu.data.database.dao.ReminderDao;
+import com.example.appquanlychitieu.data.model.Goal;
+import com.example.appquanlychitieu.data.model.Reminder;
+
+@Database(entities = {Transaction.class, Category.class, Budget.class, User.class, Goal.class, Reminder.class}, version = 5, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -32,6 +37,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CategoryDao categoryDao();
     public abstract BudgetDao budgetDao();
     public abstract UserDao userDao();
+    public abstract GoalDao goalDao();
+    public abstract ReminderDao reminderDao();
 
     private static volatile AppDatabase INSTANCE;
     public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
@@ -84,6 +91,7 @@ public abstract class AppDatabase extends RoomDatabase {
         categories.add(new Category("Quà tặng", "ic_gift", "#E91E63", TransactionType.INCOME, true));
         categories.add(new Category("Đầu tư", "ic_invest", "#00BCD4", TransactionType.INCOME, true));
         categories.add(new Category("Làm thêm", "ic_freelance", "#8BC34A", TransactionType.INCOME, true));
+        categories.add(new Category("Khác", "ic_other", "#607D8B", TransactionType.INCOME, true));
 
         return categories;
     }

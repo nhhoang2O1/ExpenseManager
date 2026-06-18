@@ -81,12 +81,17 @@ public class TransactionListAdapter extends BaseAdapter {
         Transaction transaction = transactions.get(position);
         Category category = categoryCache.get(transaction.getCategoryId());
 
-        // Ghi chú
+        // Danh mục ở trên, Ghi chú & Ngày tháng ở dưới
         String note = transaction.getNote();
-        holder.tvNote.setText(note != null && !note.isEmpty() ? note : (category != null ? category.getName() : ""));
+        String categoryName = category != null ? category.getName() : "";
+        String dateLabel = com.example.appquanlychitieu.util.DateUtils.getRelativeDateLabel(transaction.getDate());
 
-        // Tên danh mục
-        holder.tvCategory.setText(category != null ? category.getName() : "");
+        holder.tvNote.setText(categoryName);
+        if (note != null && !note.isEmpty()) {
+            holder.tvCategory.setText(note + " • " + dateLabel);
+        } else {
+            holder.tvCategory.setText(dateLabel);
+        }
 
         // Số tiền
         boolean isExpense = transaction.getType() == TransactionType.EXPENSE;

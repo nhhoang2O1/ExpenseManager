@@ -1,0 +1,29 @@
+package com.example.appquanlychitieu.receiver;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
+import com.example.appquanlychitieu.data.database.AppDatabase;
+import com.example.appquanlychitieu.data.model.Reminder;
+
+import java.util.List;
+
+public class BootReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            Log.d("BootReceiver", "Device booted. Rescheduling alarms.");
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                AppDatabase db = AppDatabase.getDatabase(context);
+                List<Reminder> activeReminders = db.reminderDao().getActiveReminders();
+                if (activeReminders != null) {
+                    for (Reminder r : activeReminders) {
+                        ReminderManager.scheduleReminder(context, r);
+                    }
+                }
+            });
+        }
+    }
+}

@@ -56,7 +56,11 @@ public class BudgetFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ListView lvBudgets = view.findViewById(R.id.rv_budgets);
-        TextView tvEmpty = view.findViewById(R.id.tv_empty);
+        View layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        android.widget.Button btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
+        ((TextView) view.findViewById(R.id.tv_empty_title)).setText(R.string.empty_budget_title);
+        ((TextView) view.findViewById(R.id.tv_empty_desc)).setText(R.string.empty_budget_desc);
+        btnEmptyCta.setText(R.string.empty_budget_cta);
         TextView tvCurrentMonth = view.findViewById(R.id.tv_current_month);
         ImageButton btnPrev = view.findViewById(R.id.btn_prev_month);
         ImageButton btnNext = view.findViewById(R.id.btn_next_month);
@@ -87,10 +91,10 @@ public class BudgetFragment extends Fragment {
             if (budgets != null && !budgets.isEmpty()) {
                 adapter.setBudgets(budgets);
                 lvBudgets.setVisibility(View.VISIBLE);
-                tvEmpty.setVisibility(View.GONE);
+                layoutEmptyState.setVisibility(View.GONE);
             } else {
                 lvBudgets.setVisibility(View.GONE);
-                tvEmpty.setVisibility(View.VISIBLE);
+                layoutEmptyState.setVisibility(View.VISIBLE);
             }
         });
 
@@ -124,6 +128,7 @@ public class BudgetFragment extends Fragment {
         btnPrev.setOnClickListener(v -> viewModel.previousMonth());
         btnNext.setOnClickListener(v -> viewModel.nextMonth());
         fabAdd.setOnClickListener(v -> showAddBudgetDialog());
+        btnEmptyCta.setOnClickListener(v -> showAddBudgetDialog());
     }
 
     private void showAddBudgetDialog() {

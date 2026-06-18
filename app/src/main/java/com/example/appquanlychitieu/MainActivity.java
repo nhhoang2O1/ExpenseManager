@@ -9,9 +9,11 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.appquanlychitieu.data.database.AppDatabase;
+import com.example.appquanlychitieu.ui.transaction.AddEditTransactionActivity;
 import com.example.appquanlychitieu.ui.auth.LoginActivity;
 import com.example.appquanlychitieu.util.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
@@ -51,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupMainContent() {
         setContentView(R.layout.activity_main);
+        FloatingActionButton fabAddTransaction = findViewById(R.id.fab_add_transaction);
+        fabAddTransaction.setOnClickListener(v ->
+                startActivity(new Intent(this, AddEditTransactionActivity.class)));
 
         // Setup Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -60,6 +65,16 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = navHostFragment.getNavController();
             BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
             NavigationUI.setupWithNavController(bottomNav, navController);
+
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                int destinationId = destination.getId();
+                if (destinationId == R.id.navigation_transactions
+                        || destinationId == R.id.navigation_statistics) {
+                    fabAddTransaction.show();
+                } else {
+                    fabAddTransaction.hide();
+                }
+            });
         }
     }
 

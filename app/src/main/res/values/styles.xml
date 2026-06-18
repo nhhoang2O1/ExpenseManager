@@ -20,6 +20,26 @@
         <item name="cornerRadius">12dp</item>
     </style>
 
+    <style name="Widget.App.Button.QuickAction" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="iconSize">20dp</item>
+    </style>
+
+    <style name="Widget.App.Button.QuickAction.Income">
+        <item name="backgroundTint">@color/income_color</item>
+    </style>
+
+    <style name="Widget.App.Button.QuickAction.Expense">
+        <item name="backgroundTint">@color/expense_color</item>
+    </style>
+
+    <style name="Widget.App.Button.QuickAction.Budget">
+        <item name="backgroundTint">@color/budget_color</item>
+    </style>
+
     <!-- Text Input -->
     <style name="Widget.App.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">12dp</item>

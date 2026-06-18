@@ -70,16 +70,11 @@
             android:dividerHeight="0dp" />
 
         <!-- Empty State -->
-        <TextView
-            android:id="@+id/tv_empty"
+        <include
+            layout="@layout/layout_empty_state_budget"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/no_budget"
-            android:textColor="@color/text_hint"
-            android:textSize="@dimen/text_body"
-            android:visibility="gone" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
