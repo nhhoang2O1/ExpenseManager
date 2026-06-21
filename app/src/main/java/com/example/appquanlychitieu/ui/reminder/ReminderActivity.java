@@ -191,8 +191,8 @@ public class ReminderActivity extends AppCompatActivity {
             if (reminder == null) {
                 Reminder newReminder = new Reminder(content, day, selectedHour, selectedMinute, sessionManager.getUserId(), true);
                 AppDatabase.databaseWriteExecutor.execute(() -> {
-                    AppDatabase db = AppDatabase.getDatabase(ReminderActivity.this);
-                    long id = db.reminderDao().insert(newReminder);
+                    com.example.appquanlychitieu.data.repository.ReminderRepository repo = new com.example.appquanlychitieu.data.repository.ReminderRepository(getApplication());
+                    long id = repo.insertSync(newReminder);
                     newReminder.setId(id);
                     runOnUiThread(() -> {
                         ReminderManager.scheduleReminder(ReminderActivity.this, newReminder);

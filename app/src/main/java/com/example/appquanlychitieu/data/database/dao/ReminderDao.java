@@ -30,4 +30,7 @@ public interface ReminderDao {
     
     @Query("SELECT * FROM reminders WHERE id = :id")
     Reminder getReminderById(long id);
+
+    @Query("DELETE FROM reminders WHERE userId = :userId")
+    void deleteAllByUser(long userId);
 }

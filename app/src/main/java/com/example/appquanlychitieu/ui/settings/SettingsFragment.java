@@ -11,10 +11,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.example.appquanlychitieu.R;
 import com.example.appquanlychitieu.data.database.AppDatabase;
 import com.example.appquanlychitieu.ui.auth.LoginActivity;
+import com.example.appquanlychitieu.ui.reminder.ReminderActivity;
 import com.example.appquanlychitieu.util.SessionManager;
 import com.example.appquanlychitieu.util.ThemeManager;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -36,6 +38,8 @@ public class SettingsFragment extends Fragment {
 
         View cardReset = view.findViewById(R.id.card_reset_data);
         View cardLogout = view.findViewById(R.id.card_logout);
+        View cardGoals = view.findViewById(R.id.card_goals);
+        View cardReminders = view.findViewById(R.id.card_reminders);
         SwitchMaterial switchDarkMode = view.findViewById(R.id.switch_dark_mode);
 
         // Dark mode
@@ -43,6 +47,14 @@ public class SettingsFragment extends Fragment {
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ThemeManager.setDarkMode(requireContext(), isChecked);
         });
+
+        // Mục tiêu tiết kiệm — navigate đến GoalFragment
+        cardGoals.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_settings_to_goals));
+
+        // Nhắc nhở — mở ReminderActivity
+        cardReminders.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ReminderActivity.class)));
 
         // Reset data
         cardReset.setOnClickListener(v -> {
@@ -55,6 +67,8 @@ public class SettingsFragment extends Fragment {
                         AppDatabase.databaseWriteExecutor.execute(() -> {
                             db.transactionDao().deleteAllByUser(userId);
                             db.budgetDao().deleteAllByUser(userId);
+                            db.goalDao().deleteAllByUser(userId);
+                            db.reminderDao().deleteAllByUser(userId);
                             requireActivity().runOnUiThread(() ->
                                     Toast.makeText(requireContext(), R.string.success, Toast.LENGTH_SHORT).show());
                         });

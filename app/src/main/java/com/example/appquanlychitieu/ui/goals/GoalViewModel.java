@@ -6,28 +6,26 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.example.appquanlychitieu.data.database.AppDatabase;
-import com.example.appquanlychitieu.data.database.dao.GoalDao;
 import com.example.appquanlychitieu.data.model.Goal;
+import com.example.appquanlychitieu.data.model.GoalHistory;
+import com.example.appquanlychitieu.data.repository.GoalRepository;
 import com.example.appquanlychitieu.util.SessionManager;
 
 import java.util.List;
 
 public class GoalViewModel extends AndroidViewModel {
-    private final GoalDao goalDao;
-    private final AppDatabase db;
+    private final GoalRepository repository;
     private final long userId;
     private final LiveData<List<Goal>> goals;
 
     public GoalViewModel(@NonNull Application application) {
         super(application);
-        db = AppDatabase.getDatabase(application);
-        goalDao = db.goalDao();
+        repository = new GoalRepository(application);
         
         SessionManager session = new SessionManager(application);
         userId = session.getUserId();
 
-        goals = goalDao.getGoalsByUser(userId);
+        goals = repository.getGoalsByUser(userId);
     }
 
     public LiveData<List<Goal>> getGoals() {
@@ -35,26 +33,23 @@ public class GoalViewModel extends AndroidViewModel {
     }
 
     public void insertGoal(Goal goal) {
-        AppDatabase.databaseWriteExecutor.execute(() -> goalDao.insert(goal));
+        repository.insert(goal);
     }
 
     public void updateGoal(Goal goal) {
-        AppDatabase.databaseWriteExecutor.execute(() -> goalDao.update(goal));
+        repository.update(goal);
     }
 
     public void deleteGoal(Goal goal) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            goalDao.delete(goal);
-            // Delete history is handled by CASCADE in the entity, but if it doesn't work, we can manually delete it here.
-        });
+        repository.delete(goal);
     }
 
-    public LiveData<List<com.example.appquanlychitieu.data.model.GoalHistory>> getHistoryForGoal(long goalId) {
-        return db.goalHistoryDao().getHistoryByGoalId(goalId);
+    public LiveData<List<GoalHistory>> getHistoryForGoal(long goalId) {
+        return repository.getHistoryByGoalId(goalId);
     }
 
-    public void insertGoalHistory(com.example.appquanlychitieu.data.model.GoalHistory history) {
-        AppDatabase.databaseWriteExecutor.execute(() -> db.goalHistoryDao().insert(history));
+    public void insertGoalHistory(GoalHistory history) {
+        repository.insertHistory(history);
     }
 
     public long getUserId() {

@@ -6,37 +6,32 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.example.appquanlychitieu.data.database.AppDatabase;
-import com.example.appquanlychitieu.data.database.dao.ReminderDao;
 import com.example.appquanlychitieu.data.model.Reminder;
+import com.example.appquanlychitieu.data.repository.ReminderRepository;
 
 import java.util.List;
 
 public class ReminderViewModel extends AndroidViewModel {
-    private final ReminderDao reminderDao;
+    private final ReminderRepository repository;
 
     public ReminderViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getDatabase(application);
-        reminderDao = db.reminderDao();
+        repository = new ReminderRepository(application);
     }
 
     public LiveData<List<Reminder>> getReminders(long userId) {
-        return reminderDao.getRemindersByUser(userId);
+        return repository.getRemindersByUser(userId);
     }
 
     public void insert(Reminder reminder) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            long id = reminderDao.insert(reminder);
-            reminder.setId(id);
-        });
+        repository.insert(reminder);
     }
 
     public void update(Reminder reminder) {
-        AppDatabase.databaseWriteExecutor.execute(() -> reminderDao.update(reminder));
+        repository.update(reminder);
     }
 
     public void delete(Reminder reminder) {
-        AppDatabase.databaseWriteExecutor.execute(() -> reminderDao.delete(reminder));
+        repository.delete(reminder);
     }
 }

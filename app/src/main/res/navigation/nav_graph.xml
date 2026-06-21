@@ -23,22 +23,36 @@
         android:label="@string/nav_statistics"
         tools:layout="@layout/fragment_statistics" />
 
+    <!-- Tab Ngân sách — trỏ đúng về BudgetFragment -->
     <fragment
         android:id="@+id/navigation_budget"
-        android:name="com.example.appquanlychitieu.ui.goals.GoalFragment"
+        android:name="com.example.appquanlychitieu.ui.budget.BudgetFragment"
         android:label="@string/nav_budget"
-        tools:layout="@layout/fragment_goals">
-        <action
-            android:id="@+id/action_navigation_budget_to_navigation_goal_history"
-            app:destination="@id/navigation_goal_history" />
-    </fragment>
+        tools:layout="@layout/fragment_budget" />
 
+    <!-- Tab Cài đặt — có action chuyển sang Goals -->
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.example.appquanlychitieu.ui.settings.SettingsFragment"
         android:label="@string/nav_settings"
-        tools:layout="@layout/fragment_settings" />
-        
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settings_to_goals"
+            app:destination="@id/navigation_goals" />
+    </fragment>
+
+    <!-- Trang Mục tiêu tiết kiệm (truy cập từ Settings) -->
+    <fragment
+        android:id="@+id/navigation_goals"
+        android:name="com.example.appquanlychitieu.ui.goals.GoalFragment"
+        android:label="Mục tiêu tiết kiệm"
+        tools:layout="@layout/fragment_goals">
+        <action
+            android:id="@+id/action_goals_to_goal_history"
+            app:destination="@id/navigation_goal_history" />
+    </fragment>
+
+    <!-- Lịch sử nạp tiền mục tiêu -->
     <fragment
         android:id="@+id/navigation_goal_history"
         android:name="com.example.appquanlychitieu.ui.goals.GoalHistoryFragment"

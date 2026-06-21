@@ -137,7 +137,7 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
         bundle.putString("goalName", goal.getName());
         
         androidx.navigation.Navigation.findNavController(requireView())
-            .navigate(R.id.action_navigation_budget_to_navigation_goal_history, bundle);
+            .navigate(R.id.action_goals_to_goal_history, bundle);
     }
 
     @Override
