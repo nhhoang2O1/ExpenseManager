@@ -62,6 +62,10 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         ImageButton btnBack = findViewById(R.id.btn_back);
         TextView tvTitle = findViewById(R.id.tv_title);
 
+        // Add NumberTextWatcher for thousand separator
+        etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etAmount));
+
         // Ngày mặc định
         etDate.setText(DateUtils.formatDate(selectedDate));
 
@@ -244,6 +248,9 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             return;
         }
 
+        // Remove thousand separators before parsing
+        amountStr = amountStr.replace(".", "");
+        
         double amount;
         try {
             amount = Double.parseDouble(amountStr);

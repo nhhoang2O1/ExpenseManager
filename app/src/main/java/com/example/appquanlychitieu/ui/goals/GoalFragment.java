@@ -65,21 +65,24 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
         etName.setHint("Tên mục tiêu (VD: Mua xe, Du lịch...)");
         layout.addView(etName);
 
-        EditText etAmount = new EditText(requireContext());
-        etAmount.setHint("Số tiền mục tiêu (VNĐ)");
-        etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        layout.addView(etAmount);
+        EditText etTargetAmount = new EditText(requireContext());
+        etTargetAmount.setHint("Số tiền mục tiêu (VNĐ)");
+        etTargetAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etTargetAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etTargetAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etTargetAmount));
+        layout.addView(etTargetAmount);
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Thêm mục tiêu mới")
                 .setView(layout)
                 .setPositiveButton("Lưu", (dialog, which) -> {
                     String name = etName.getText().toString().trim();
-                    String amountStr = etAmount.getText().toString().trim();
+                    String amountStr = etTargetAmount.getText().toString().trim();
                     if (name.isEmpty() || amountStr.isEmpty()) {
                         Toast.makeText(requireContext(), "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    amountStr = amountStr.replace(".", "");
                     double targetAmount = Double.parseDouble(amountStr);
                     Goal goal = new Goal(name, targetAmount, 0, viewModel.getUserId());
                     viewModel.insertGoal(goal);
@@ -97,6 +100,8 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
         EditText etAmount = new EditText(requireContext());
         etAmount.setHint("Số tiền nạp thêm (VNĐ)");
         etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etAmount));
         layout.addView(etAmount);
 
         new AlertDialog.Builder(requireContext())
@@ -105,12 +110,34 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
                 .setPositiveButton("Cập nhật", (dialog, which) -> {
                     String amountStr = etAmount.getText().toString().trim();
                     if (amountStr.isEmpty()) return;
+                    amountStr = amountStr.replace(".", "");
                     double addedAmount = Double.parseDouble(amountStr);
-                    goal.setCurrentAmount(goal.getCurrentAmount() + addedAmount);
+                    
+                    double oldAmount = goal.getCurrentAmount();
+                    double newAmount = oldAmount + addedAmount;
+                    
+                    goal.setCurrentAmount(newAmount);
                     viewModel.updateGoal(goal);
+                    
+                    com.example.appquanlychitieu.data.model.GoalHistory history = new com.example.appquanlychitieu.data.model.GoalHistory(goal.getId(), addedAmount, System.currentTimeMillis());
+                    viewModel.insertGoalHistory(history);
+                    
+                    if (oldAmount < goal.getTargetAmount() && newAmount >= goal.getTargetAmount()) {
+                        Toast.makeText(requireContext(), "🎉 Chúc mừng! Bạn đã hoàn thành mục tiêu: " + goal.getName(), Toast.LENGTH_LONG).show();
+                    }
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+
+    @Override
+    public void onGoalClick(Goal goal) {
+        Bundle bundle = new Bundle();
+        bundle.putLong("goalId", goal.getId());
+        bundle.putString("goalName", goal.getName());
+        
+        androidx.navigation.Navigation.findNavController(requireView())
+            .navigate(R.id.action_navigation_budget_to_navigation_goal_history, bundle);
     }
 
     @Override

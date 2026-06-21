@@ -47,7 +47,7 @@ public class TransactionListFragment extends Fragment {
     // Transaction
     private TransactionListViewModel viewModel;
     private TransactionListAdapter adapter;
-    private TextView tvDateRange;
+
 
     // Budget
     private BudgetViewModel budgetViewModel;
@@ -81,8 +81,8 @@ public class TransactionListFragment extends Fragment {
         Chip chipExpense = view.findViewById(R.id.chip_expense);
         Chip chipIncome = view.findViewById(R.id.chip_income);
         
-        tvDateRange = view.findViewById(R.id.tv_date_range);
-        ImageButton btnFilterDate = view.findViewById(R.id.btn_filter_date);
+
+        android.view.View btnFilterDate = view.findViewById(R.id.btn_filter_date);
 
         adapter = new TransactionListAdapter(requireContext());
         lvTransactions.setAdapter(adapter);
@@ -239,7 +239,7 @@ public class TransactionListFragment extends Fragment {
                 Toast.makeText(requireContext(), "Chỉ được chọn tối đa 15 ngày", Toast.LENGTH_SHORT).show();
             } else {
                 viewModel.setDateRange(start, end);
-                tvDateRange.setText(DateUtils.formatDate(start) + " - " + DateUtils.formatDate(end));
+
             }
         });
         
@@ -268,6 +268,8 @@ public class TransactionListFragment extends Fragment {
         EditText etAmount = new EditText(requireContext());
         etAmount.setHint("Hạn mức (VNĐ)");
         etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etAmount));
         layout.addView(etAmount);
 
         new AlertDialog.Builder(requireContext())
@@ -276,6 +278,7 @@ public class TransactionListFragment extends Fragment {
                 .setPositiveButton(R.string.save, (dialog, which) -> {
                     String amountStr = etAmount.getText().toString().trim();
                     if (amountStr.isEmpty()) return;
+                    amountStr = amountStr.replace(".", "");
                     Category selectedCategory = expenseCategories.get(spinner.getSelectedItemPosition());
                     int[] my = budgetViewModel.getSelectedMonthYear().getValue();
                     if (my != null) {

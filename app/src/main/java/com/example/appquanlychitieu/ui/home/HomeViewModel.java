@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
 import com.example.appquanlychitieu.data.model.Transaction;
 import com.example.appquanlychitieu.data.model.TransactionType;
@@ -21,6 +23,10 @@ public class HomeViewModel extends AndroidViewModel {
     private final LiveData<Double> totalExpense;
     private final LiveData<List<Transaction>> recentTransactions;
     private final MediatorLiveData<Double> balance = new MediatorLiveData<>();
+
+    private final MutableLiveData<Long> selectedDate = new MutableLiveData<>();
+    private final LiveData<Double> dailyIncome;
+    private final LiveData<Double> dailyExpense;
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -47,10 +53,36 @@ public class HomeViewModel extends AndroidViewModel {
             double exp = expense != null ? expense : 0;
             balance.setValue(inc - exp);
         });
+
+        selectedDate.setValue(System.currentTimeMillis());
+        
+        dailyIncome = Transformations.switchMap(selectedDate, date -> {
+            long start = DateUtils.getStartOfDay(date);
+            long end = DateUtils.getEndOfDay(date);
+            return repository.getTotalByTypeAndDateRange(userId, TransactionType.INCOME, start, end);
+        });
+        
+        dailyExpense = Transformations.switchMap(selectedDate, date -> {
+            long start = DateUtils.getStartOfDay(date);
+            long end = DateUtils.getEndOfDay(date);
+            return repository.getTotalByTypeAndDateRange(userId, TransactionType.EXPENSE, start, end);
+        });
     }
 
     public LiveData<Double> getTotalIncome() { return totalIncome; }
     public LiveData<Double> getTotalExpense() { return totalExpense; }
     public LiveData<List<Transaction>> getRecentTransactions() { return recentTransactions; }
     public LiveData<Double> getBalance() { return balance; }
+
+    public LiveData<Long> getSelectedDate() { return selectedDate; }
+    public LiveData<Double> getDailyIncome() { return dailyIncome; }
+    public LiveData<Double> getDailyExpense() { return dailyExpense; }
+
+    public void setSelectedDate(long date) {
+        selectedDate.setValue(date);
+    }
+
+    public void deleteTransaction(Transaction transaction) {
+        repository.delete(transaction);
+    }
 }

@@ -29,7 +29,11 @@ import com.example.appquanlychitieu.data.database.dao.ReminderDao;
 import com.example.appquanlychitieu.data.model.Goal;
 import com.example.appquanlychitieu.data.model.Reminder;
 
-@Database(entities = {Transaction.class, Category.class, Budget.class, User.class, Goal.class, Reminder.class}, version = 5, exportSchema = false)
+import androidx.room.migration.Migration;
+import com.example.appquanlychitieu.data.database.dao.GoalHistoryDao;
+import com.example.appquanlychitieu.data.model.GoalHistory;
+
+@Database(entities = {Transaction.class, Category.class, Budget.class, User.class, Goal.class, Reminder.class, GoalHistory.class}, version = 6, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -39,9 +43,18 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
     public abstract GoalDao goalDao();
     public abstract ReminderDao reminderDao();
+    public abstract GoalHistoryDao goalHistoryDao();
 
     private static volatile AppDatabase INSTANCE;
     public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
+
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `goal_history` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `goalId` INTEGER NOT NULL, `amountAdded` REAL NOT NULL, `date` INTEGER NOT NULL, FOREIGN KEY(`goalId`) REFERENCES `goals`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_goal_history_goalId` ON `goal_history` (`goalId`)");
+        }
+    };
 
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
@@ -51,6 +64,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     context.getApplicationContext(),
                                     AppDatabase.class,
                                     "expense_manager_db")
+                            .addMigrations(MIGRATION_5_6)
                             .fallbackToDestructiveMigration()
                             .addCallback(new Callback() {
                                 @Override

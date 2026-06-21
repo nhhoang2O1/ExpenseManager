@@ -27,11 +27,30 @@
         android:id="@+id/navigation_budget"
         android:name="com.example.appquanlychitieu.ui.goals.GoalFragment"
         android:label="@string/nav_budget"
-        tools:layout="@layout/fragment_goals" />
+        tools:layout="@layout/fragment_goals">
+        <action
+            android:id="@+id/action_navigation_budget_to_navigation_goal_history"
+            app:destination="@id/navigation_goal_history" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.example.appquanlychitieu.ui.settings.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings" />
+        
+    <fragment
+        android:id="@+id/navigation_goal_history"
+        android:name="com.example.appquanlychitieu.ui.goals.GoalHistoryFragment"
+        android:label="Lịch sử nạp"
+        tools:layout="@layout/fragment_goal_history">
+        <argument
+            android:name="goalId"
+            app:argType="long"
+            android:defaultValue="0L" />
+        <argument
+            android:name="goalName"
+            app:argType="string"
+            android:defaultValue='""' />
+    </fragment>
 </navigation>

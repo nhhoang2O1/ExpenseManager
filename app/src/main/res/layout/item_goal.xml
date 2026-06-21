@@ -5,7 +5,10 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="@dimen/card_elevation"
-    app:cardUseCompatPadding="true">
+    app:cardUseCompatPadding="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,6 +31,21 @@
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_subtitle"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_goal_completed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_progress_bar"
+                android:backgroundTint="#4CAF50"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="Hoàn thành"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <!-- Add funds button -->
             <ImageButton

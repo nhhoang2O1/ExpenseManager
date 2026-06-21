@@ -67,6 +67,16 @@ public class DateUtils {
         return cal.getTimeInMillis();
     }
 
+    public static long getEndOfDay(long timestamp) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(timestamp);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTimeInMillis();
+    }
+
     public static boolean isSameDay(long timestamp1, long timestamp2) {
         Calendar cal1 = Calendar.getInstance();
         cal1.setTimeInMillis(timestamp1);

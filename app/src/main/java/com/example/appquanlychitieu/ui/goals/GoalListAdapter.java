@@ -22,6 +22,7 @@ public class GoalListAdapter extends BaseAdapter {
     private OnGoalInteractionListener listener;
 
     public interface OnGoalInteractionListener {
+        void onGoalClick(Goal goal);
         void onAddFundsClick(Goal goal);
         void onGoalLongClick(Goal goal);
     }
@@ -63,6 +64,7 @@ public class GoalListAdapter extends BaseAdapter {
             holder.tvPercentage = convertView.findViewById(R.id.tv_percentage);
             holder.pbProgress = convertView.findViewById(R.id.pb_goal_progress);
             holder.btnAddFunds = convertView.findViewById(R.id.btn_add_funds);
+            holder.tvCompleted = convertView.findViewById(R.id.tv_goal_completed);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -83,8 +85,20 @@ public class GoalListAdapter extends BaseAdapter {
         holder.tvPercentage.setText(percentage + "%");
         holder.pbProgress.setProgress(percentage);
 
+        if (percentage >= 100) {
+            holder.tvCompleted.setVisibility(View.VISIBLE);
+            holder.btnAddFunds.setVisibility(View.GONE);
+        } else {
+            holder.tvCompleted.setVisibility(View.GONE);
+            holder.btnAddFunds.setVisibility(View.VISIBLE);
+        }
+
         holder.btnAddFunds.setOnClickListener(v -> {
             if (listener != null) listener.onAddFundsClick(goal);
+        });
+
+        convertView.setOnClickListener(v -> {
+            if (listener != null) listener.onGoalClick(goal);
         });
 
         convertView.setOnLongClickListener(v -> {
@@ -102,5 +116,6 @@ public class GoalListAdapter extends BaseAdapter {
         TextView tvPercentage;
         ProgressBar pbProgress;
         ImageButton btnAddFunds;
+        TextView tvCompleted;
     }
 }

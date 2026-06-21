@@ -98,6 +98,40 @@ public class HomeFragment extends Fragment {
         // Observe giao dịch gần nhất
         viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::updateRecentTransactionsList);
 
+        // Daily Statistics UI Setup
+        androidx.cardview.widget.CardView cardDailyStats = view.findViewById(R.id.card_daily_stats);
+        TextView tvDailyDate = view.findViewById(R.id.tv_daily_date);
+        TextView tvDailyIncome = view.findViewById(R.id.tv_daily_income);
+        TextView tvDailyExpense = view.findViewById(R.id.tv_daily_expense);
+
+        viewModel.getSelectedDate().observe(getViewLifecycleOwner(), date -> {
+            if (date != null) {
+                tvDailyDate.setText("Ngày " + DateUtils.formatDate(date));
+            }
+        });
+
+        viewModel.getDailyIncome().observe(getViewLifecycleOwner(), income -> {
+            tvDailyIncome.setText("+ " + CurrencyFormatter.format(income != null ? income : 0));
+        });
+
+        viewModel.getDailyExpense().observe(getViewLifecycleOwner(), expense -> {
+            tvDailyExpense.setText("- " + CurrencyFormatter.format(expense != null ? expense : 0));
+        });
+
+        cardDailyStats.setOnClickListener(v -> {
+            com.google.android.material.datepicker.MaterialDatePicker<Long> datePicker =
+                    com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
+                            .setTitleText("Chọn ngày thống kê")
+                            .setSelection(viewModel.getSelectedDate().getValue())
+                            .build();
+
+            datePicker.addOnPositiveButtonClickListener(selection -> {
+                viewModel.setSelectedDate(selection);
+            });
+
+            datePicker.show(getParentFragmentManager(), "DAILY_STATS_DATE_PICKER");
+        });
+
         btnQuickIncome.setOnClickListener(v -> openAddTransaction(TransactionType.INCOME));
         btnQuickExpense.setOnClickListener(v -> openAddTransaction(TransactionType.EXPENSE));
         btnQuickReminder.setOnClickListener(v -> {
@@ -126,6 +160,16 @@ public class HomeFragment extends Fragment {
                     Intent intent = new Intent(requireContext(), AddEditTransactionActivity.class);
                     intent.putExtra("transaction_id", transaction.getId());
                     startActivity(intent);
+                });
+                itemView.setOnLongClickListener(v -> {
+                    new android.app.AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.confirm_delete_title)
+                            .setMessage(R.string.confirm_delete)
+                            .setPositiveButton(R.string.delete, (dialog, which) ->
+                                    viewModel.deleteTransaction(transaction))
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                    return true;
                 });
                 layoutRecentTransactions.addView(itemView);
             }
