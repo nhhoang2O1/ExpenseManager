@@ -33,6 +33,8 @@ public class AddEditTransactionActivity extends AppCompatActivity {
     private GridView gvCategories;
     private MaterialButton btnSave;
     private AppDatabase db;
+    private ImageButton btnBack;
+    private TextView tvTitle;
 
     private TransactionType selectedType = TransactionType.EXPENSE;
     private long selectedDate = System.currentTimeMillis();
@@ -59,8 +61,8 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         toggleType = findViewById(R.id.toggle_type);
         gvCategories = findViewById(R.id.rv_categories);
         btnSave = findViewById(R.id.btn_save);
-        ImageButton btnBack = findViewById(R.id.btn_back);
-        TextView tvTitle = findViewById(R.id.tv_title);
+        btnBack = findViewById(R.id.btn_back);
+        tvTitle = findViewById(R.id.tv_title);
 
         // Add NumberTextWatcher for thousand separator
         etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));

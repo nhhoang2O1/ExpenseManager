@@ -97,8 +97,8 @@ public class RegisterActivity extends AppCompatActivity {
             long userId = db.userDao().insert(user);
 
             runOnUiThread(() -> {
-                // Tự động đăng nhập sau khi đăng ký thành công
-                sessionManager.createLoginSession(userId, name, email);
+                // Tự động đăng nhập sau khi đăng ký thành công (mặc định lưu phiên cho lần đăng ký)
+                sessionManager.createLoginSession(userId, name, email, true);
                 Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                 
                 // Chuyển đến MainActivity

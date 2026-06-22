@@ -23,6 +23,11 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     private GoalViewModel viewModel;
     private GoalListAdapter adapter;
 
+    // UI Variables
+    private ListView lvGoals;
+    private View layoutEmptyState;
+    private FloatingActionButton fabAddGoal;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -33,9 +38,9 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ListView lvGoals = view.findViewById(R.id.rv_goals);
-        View layoutEmptyState = view.findViewById(R.id.layout_empty_state);
-        FloatingActionButton fabAddGoal = view.findViewById(R.id.fab_add_goal);
+        lvGoals = view.findViewById(R.id.rv_goals);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        fabAddGoal = view.findViewById(R.id.fab_add_goal);
 
         adapter = new GoalListAdapter(requireContext(), this);
         lvGoals.setAdapter(adapter);

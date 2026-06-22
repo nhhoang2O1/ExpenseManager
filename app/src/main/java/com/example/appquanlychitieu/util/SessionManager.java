@@ -12,6 +12,7 @@ public class SessionManager {
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_REMEMBER_ME = "remember_me";
 
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
@@ -24,11 +25,12 @@ public class SessionManager {
     /**
      * Lưu thông tin đăng nhập
      */
-    public void createLoginSession(long userId, String name, String email) {
+    public void createLoginSession(long userId, String name, String email, boolean rememberMe) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putLong(KEY_USER_ID, userId);
         editor.putString(KEY_USER_NAME, name);
         editor.putString(KEY_USER_EMAIL, email);
+        editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
         editor.commit(); // Dùng commit() thay vì apply() để đảm bảo lưu ngay lập tức
     }
 
@@ -38,6 +40,13 @@ public class SessionManager {
     public boolean isLoggedIn() {
         return prefs.getBoolean(KEY_IS_LOGGED_IN, false)
                 && prefs.getLong(KEY_USER_ID, -1) > 0;
+    }
+
+    /**
+     * Kiểm tra người dùng có muốn lưu thông tin không
+     */
+    public boolean isRememberMe() {
+        return prefs.getBoolean(KEY_REMEMBER_ME, false);
     }
 
     /**

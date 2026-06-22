@@ -45,6 +45,17 @@ public class BudgetFragment extends Fragment {
     private LiveData<List<CategorySpent>> spentLiveData;
     private Observer<List<CategorySpent>> spentObserver;
 
+    // Khai báo các biến giao diện ở cấp class giống slide của thầy
+    private ListView lvBudgets;
+    private View layoutEmptyState;
+    private android.widget.Button btnEmptyCta;
+    private TextView tvEmptyTitle;
+    private TextView tvEmptyDesc;
+    private TextView tvCurrentMonth;
+    private ImageButton btnPrev;
+    private ImageButton btnNext;
+    private FloatingActionButton fabAdd;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -55,16 +66,21 @@ public class BudgetFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ListView lvBudgets = view.findViewById(R.id.rv_budgets);
-        View layoutEmptyState = view.findViewById(R.id.layout_empty_state);
-        android.widget.Button btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
-        ((TextView) view.findViewById(R.id.tv_empty_title)).setText(R.string.empty_budget_title);
-        ((TextView) view.findViewById(R.id.tv_empty_desc)).setText(R.string.empty_budget_desc);
+        // Ánh xạ View
+        lvBudgets = view.findViewById(R.id.rv_budgets);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        tvEmptyDesc = view.findViewById(R.id.tv_empty_desc);
+        tvCurrentMonth = view.findViewById(R.id.tv_current_month);
+        btnPrev = view.findViewById(R.id.btn_prev_month);
+        btnNext = view.findViewById(R.id.btn_next_month);
+        fabAdd = view.findViewById(R.id.fab_add_budget);
+
+        // Thiết lập dữ liệu mặc định
+        tvEmptyTitle.setText(R.string.empty_budget_title);
+        tvEmptyDesc.setText(R.string.empty_budget_desc);
         btnEmptyCta.setText(R.string.empty_budget_cta);
-        TextView tvCurrentMonth = view.findViewById(R.id.tv_current_month);
-        ImageButton btnPrev = view.findViewById(R.id.btn_prev_month);
-        ImageButton btnNext = view.findViewById(R.id.btn_next_month);
-        FloatingActionButton fabAdd = view.findViewById(R.id.fab_add_budget);
 
         // Setup ListView với BaseAdapter
         adapter = new BudgetListAdapter(requireContext());

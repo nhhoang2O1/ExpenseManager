@@ -35,6 +35,9 @@ public class StatisticsFragment extends Fragment {
     private PieChart pieChart;
     private TextView tvCurrentMonth, tvEmpty, tvHistoryEmpty;
     private android.widget.LinearLayout layoutCategorySummary, layoutMonthlyHistory;
+    
+    // UI Variables
+    private ImageButton btnPrev, btnNext;
 
     @Nullable
     @Override
@@ -52,8 +55,8 @@ public class StatisticsFragment extends Fragment {
         tvHistoryEmpty = view.findViewById(R.id.tv_history_empty);
         layoutCategorySummary = view.findViewById(R.id.layout_category_summary);
         layoutMonthlyHistory = view.findViewById(R.id.layout_monthly_history);
-        ImageButton btnPrev = view.findViewById(R.id.btn_prev_month);
-        ImageButton btnNext = view.findViewById(R.id.btn_next_month);
+        btnPrev = view.findViewById(R.id.btn_prev_month);
+        btnNext = view.findViewById(R.id.btn_next_month);
 
         setupPieChart();
 

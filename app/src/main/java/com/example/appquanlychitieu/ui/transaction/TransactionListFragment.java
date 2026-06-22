@@ -58,6 +58,16 @@ public class TransactionListFragment extends Fragment {
     private Observer<List<CategorySpent>> spentObserver;
     private LinearLayout llBudgetsContainer;
     private View layoutEmptyBudget;
+    
+    // UI Variables
+    private ListView lvTransactions;
+    private View layoutEmptyState;
+    private android.widget.Button btnEmptyCta;
+    private TextView tvEmptyTitle, tvEmptyDesc;
+    private Chip chipAll, chipExpense, chipIncome;
+    private View btnFilterDate;
+    private TextView tvCurrentMonth;
+    private ImageButton btnPrev, btnNext, btnAddBudget;
 
     @Nullable
     @Override
@@ -70,19 +80,20 @@ public class TransactionListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // ==== TRANSACTION SETUP ====
-        ListView lvTransactions = view.findViewById(R.id.rv_transactions);
-        View layoutEmptyState = view.findViewById(R.id.layout_empty_state);
-        android.widget.Button btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
-        ((TextView) view.findViewById(R.id.tv_empty_title)).setText(R.string.empty_transaction_title);
-        ((TextView) view.findViewById(R.id.tv_empty_desc)).setText(R.string.empty_transaction_desc);
+        lvTransactions = view.findViewById(R.id.rv_transactions);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        tvEmptyDesc = view.findViewById(R.id.tv_empty_desc);
+        tvEmptyTitle.setText(R.string.empty_transaction_title);
+        tvEmptyDesc.setText(R.string.empty_transaction_desc);
         btnEmptyCta.setText(R.string.empty_transaction_cta);
         
-        Chip chipAll = view.findViewById(R.id.chip_all);
-        Chip chipExpense = view.findViewById(R.id.chip_expense);
-        Chip chipIncome = view.findViewById(R.id.chip_income);
+        chipAll = view.findViewById(R.id.chip_all);
+        chipExpense = view.findViewById(R.id.chip_expense);
+        chipIncome = view.findViewById(R.id.chip_income);
         
-
-        android.view.View btnFilterDate = view.findViewById(R.id.btn_filter_date);
+        btnFilterDate = view.findViewById(R.id.btn_filter_date);
 
         adapter = new TransactionListAdapter(requireContext());
         lvTransactions.setAdapter(adapter);
@@ -92,10 +103,10 @@ public class TransactionListFragment extends Fragment {
         // ==== BUDGET SETUP ====
         llBudgetsContainer = view.findViewById(R.id.ll_budgets_container);
         layoutEmptyBudget = view.findViewById(R.id.layout_empty_budget);
-        TextView tvCurrentMonth = view.findViewById(R.id.tv_current_month);
-        ImageButton btnPrev = view.findViewById(R.id.btn_prev_month);
-        ImageButton btnNext = view.findViewById(R.id.btn_next_month);
-        ImageButton btnAddBudget = view.findViewById(R.id.btn_add_budget);
+        tvCurrentMonth = view.findViewById(R.id.tv_current_month);
+        btnPrev = view.findViewById(R.id.btn_prev_month);
+        btnNext = view.findViewById(R.id.btn_next_month);
+        btnAddBudget = view.findViewById(R.id.btn_add_budget);
 
         budgetAdapter = new BudgetListAdapter(requireContext());
         budgetViewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
