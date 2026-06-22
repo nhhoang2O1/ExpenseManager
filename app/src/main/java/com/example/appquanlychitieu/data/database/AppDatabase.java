@@ -70,7 +70,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                 @Override
                                 public void onCreate(@NonNull SupportSQLiteDatabase db) {
                                     super.onCreate(db);
-                                    // Prepopulate default categories
+                                    
                                     databaseWriteExecutor.execute(() -> {
                                         CategoryDao dao = INSTANCE.categoryDao();
                                         if (dao.getCategoryCount() == 0) {
@@ -89,7 +89,6 @@ public abstract class AppDatabase extends RoomDatabase {
     private static List<Category> getDefaultCategories() {
         List<Category> categories = new ArrayList<>();
 
-        // Expense categories
         categories.add(new Category("Ăn uống", "ic_food", "#FF5722", TransactionType.EXPENSE, true));
         categories.add(new Category("Di chuyển", "ic_transport", "#2196F3", TransactionType.EXPENSE, true));
         categories.add(new Category("Mua sắm", "ic_shopping", "#E91E63", TransactionType.EXPENSE, true));
@@ -100,7 +99,6 @@ public abstract class AppDatabase extends RoomDatabase {
         categories.add(new Category("Hóa đơn", "ic_bill", "#FF9800", TransactionType.EXPENSE, true));
         categories.add(new Category("Khác", "ic_other", "#607D8B", TransactionType.EXPENSE, true));
 
-        // Income categories
         categories.add(new Category("Lương", "ic_salary", "#4CAF50", TransactionType.INCOME, true));
         categories.add(new Category("Quà tặng", "ic_gift", "#E91E63", TransactionType.INCOME, true));
         categories.add(new Category("Đầu tư", "ic_invest", "#00BCD4", TransactionType.INCOME, true));

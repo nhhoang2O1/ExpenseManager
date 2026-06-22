@@ -17,6 +17,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
+    
+    private FloatingActionButton fabAddTransaction;
+    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +56,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupMainContent() {
         setContentView(R.layout.activity_main);
-        FloatingActionButton fabAddTransaction = findViewById(R.id.fab_add_transaction);
+        fabAddTransaction = findViewById(R.id.fab_add_transaction);
         fabAddTransaction.setOnClickListener(v ->
                 startActivity(new Intent(this, AddEditTransactionActivity.class)));
 
-        // Setup Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
-            BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+            bottomNav = findViewById(R.id.bottom_navigation);
             NavigationUI.setupWithNavController(bottomNav, navController);
 
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {

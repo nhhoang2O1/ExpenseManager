@@ -30,7 +30,6 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (reminderId != -1 && content != null) {
             showNotification(context, (int) reminderId, content);
             
-            // Lên lịch lại cho tháng sau
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 AppDatabase db = AppDatabase.getDatabase(context);
                 Reminder reminder = db.reminderDao().getReminderById(reminderId);
@@ -56,7 +55,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, notificationId, intent, flags);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_budget) // Make sure you have this icon
+                .setSmallIcon(R.drawable.ic_budget) 
                 .setContentTitle("Đến hạn thanh toán")
                 .setContentText(content)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -65,7 +64,6 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         
-        // Kiểm tra quyền Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 return;

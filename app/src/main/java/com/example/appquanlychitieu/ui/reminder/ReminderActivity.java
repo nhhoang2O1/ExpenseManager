@@ -31,6 +31,14 @@ public class ReminderActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private ReminderAdapter adapter;
     private static final int NOTIFICATION_PERMISSION_CODE = 1001;
+    
+    private MaterialToolbar toolbar;
+    private RecyclerView rvReminders;
+    private TextView tvEmpty;
+    
+    private TextView tvDialogTitle, tvSelectedTime;
+    private EditText etContent, etDay;
+    private Button btnCancel, btnSave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +51,8 @@ public class ReminderActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rvReminders = findViewById(R.id.rv_reminders);
-        TextView tvEmpty = findViewById(R.id.tv_empty);
+        rvReminders = findViewById(R.id.rv_reminders);
+        tvEmpty = findViewById(R.id.tv_empty);
 
         adapter = new ReminderAdapter();
         rvReminders.setAdapter(adapter);
@@ -130,15 +138,15 @@ public class ReminderActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_add_reminder);
         dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
-        EditText etContent = dialog.findViewById(R.id.et_content);
-        EditText etDay = dialog.findViewById(R.id.et_day);
-        TextView tvSelectedTime = dialog.findViewById(R.id.tv_selected_time);
-        Button btnCancel = dialog.findViewById(R.id.btn_cancel);
-        Button btnSave = dialog.findViewById(R.id.btn_save);
+        tvDialogTitle = dialog.findViewById(R.id.tv_dialog_title);
+        etContent = dialog.findViewById(R.id.et_content);
+        etDay = dialog.findViewById(R.id.et_day);
+        tvSelectedTime = dialog.findViewById(R.id.tv_selected_time);
+        btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnSave = dialog.findViewById(R.id.btn_save);
 
         if (reminder != null) {
-            tvTitle.setText("Sửa nhắc nhở");
+            tvDialogTitle.setText("Sửa nhắc nhở");
             etContent.setText(reminder.getContent());
             etDay.setText(String.valueOf(reminder.getDayOfMonth()));
             selectedHour = reminder.getHour();

@@ -2,6 +2,7 @@ package com.example.appquanlychitieu.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,9 @@ import com.google.android.material.textfield.TextInputEditText;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword;
+    private CheckBox cbRememberMe;
+    private MaterialButton btnLogin;
+    private TextView tvRegister;
     private SessionManager sessionManager;
 
     @Override
@@ -28,7 +32,12 @@ public class LoginActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
 
         if (sessionManager.isLoggedIn()) {
-            validateSavedSession();
+            if (sessionManager.isRememberMe()) {
+                validateSavedSession();
+            } else {
+                sessionManager.logout();
+                showLoginForm();
+            }
         } else {
             showLoginForm();
         }
@@ -39,8 +48,9 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
-        MaterialButton btnLogin = findViewById(R.id.btn_login);
-        TextView tvRegister = findViewById(R.id.tv_register);
+        cbRememberMe = findViewById(R.id.cb_remember_me);
+        btnLogin = findViewById(R.id.btn_login);
+        tvRegister = findViewById(R.id.tv_register);
 
         btnLogin.setOnClickListener(v -> login());
 
@@ -87,12 +97,13 @@ public class LoginActivity extends AppCompatActivity {
 
         AppDatabase db = AppDatabase.getDatabase(this);
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            // Lấy user theo email, sau đó verify password hash
+            
             User user = db.userDao().getUserByEmailForLogin(email);
             boolean isPasswordCorrect = user != null && PasswordUtils.verify(password, user.getPassword());
             runOnUiThread(() -> {
                 if (isPasswordCorrect) {
-                    sessionManager.createLoginSession(user.getId(), user.getName(), user.getEmail());
+                    boolean rememberMe = cbRememberMe.isChecked();
+                    sessionManager.createLoginSession(user.getId(), user.getName(), user.getEmail(), rememberMe);
                     Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                     navigateToMain();
                 } else {

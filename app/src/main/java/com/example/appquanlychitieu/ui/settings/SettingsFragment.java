@@ -23,6 +23,9 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
     private SessionManager sessionManager;
+    
+    private View cardReset, cardLogout, cardGoals, cardReminders;
+    private SwitchMaterial switchDarkMode;
 
     @Nullable
     @Override
@@ -36,32 +39,28 @@ public class SettingsFragment extends Fragment {
 
         sessionManager = new SessionManager(requireContext());
 
-        View cardReset = view.findViewById(R.id.card_reset_data);
-        View cardLogout = view.findViewById(R.id.card_logout);
-        View cardGoals = view.findViewById(R.id.card_goals);
-        View cardReminders = view.findViewById(R.id.card_reminders);
-        SwitchMaterial switchDarkMode = view.findViewById(R.id.switch_dark_mode);
+        cardReset = view.findViewById(R.id.card_reset_data);
+        cardLogout = view.findViewById(R.id.card_logout);
+        cardGoals = view.findViewById(R.id.card_goals);
+        cardReminders = view.findViewById(R.id.card_reminders);
+        switchDarkMode = view.findViewById(R.id.switch_dark_mode);
         android.widget.TextView tvUsername = view.findViewById(R.id.tv_username);
         android.widget.TextView tvEmail = view.findViewById(R.id.tv_email);
 
         tvUsername.setText(sessionManager.getUserName());
         tvEmail.setText(sessionManager.getUserEmail());
 
-        // Dark mode
         switchDarkMode.setChecked(ThemeManager.isDarkMode(requireContext()));
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ThemeManager.setDarkMode(requireContext(), isChecked);
         });
 
-        // Mục tiêu tiết kiệm — navigate đến GoalFragment
         cardGoals.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_settings_to_goals));
 
-        // Nhắc nhở — mở ReminderActivity
         cardReminders.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), ReminderActivity.class)));
 
-        // Reset data
         cardReset.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle(R.string.reset_data)
@@ -82,7 +81,6 @@ public class SettingsFragment extends Fragment {
                     .show();
         });
 
-        // Logout
         cardLogout.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Đăng xuất")

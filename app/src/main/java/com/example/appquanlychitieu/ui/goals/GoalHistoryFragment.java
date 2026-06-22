@@ -21,6 +21,11 @@ public class GoalHistoryFragment extends Fragment {
     private GoalViewModel viewModel;
     private GoalHistoryAdapter adapter;
 
+    private android.widget.TextView tvTitle;
+    private android.widget.ImageButton btnBack;
+    private android.widget.ListView rvHistory;
+    private LinearLayout layoutEmptyState;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -39,14 +44,14 @@ public class GoalHistoryFragment extends Fragment {
             goalName = getArguments().getString("goalName", "Lịch sử nạp");
         }
 
-        android.widget.TextView tvTitle = view.findViewById(R.id.tv_title);
+        tvTitle = view.findViewById(R.id.tv_title);
         tvTitle.setText("Lịch sử nạp: " + goalName);
         
-        android.widget.ImageButton btnBack = view.findViewById(R.id.btn_back);
+        btnBack = view.findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
 
-        android.widget.ListView rvHistory = view.findViewById(R.id.rv_goal_history);
-        LinearLayout layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        rvHistory = view.findViewById(R.id.rv_goal_history);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
 
         adapter = new GoalHistoryAdapter(requireContext());
         rvHistory.setAdapter(adapter);

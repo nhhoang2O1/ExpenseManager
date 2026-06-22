@@ -23,6 +23,13 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     private GoalViewModel viewModel;
     private GoalListAdapter adapter;
 
+    private ListView lvGoals;
+    private View layoutEmptyState;
+    private FloatingActionButton fabAddGoal;
+    
+    private LinearLayout dialogLayout;
+    private EditText etGoalName, etGoalAmount;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -33,9 +40,9 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ListView lvGoals = view.findViewById(R.id.rv_goals);
-        View layoutEmptyState = view.findViewById(R.id.layout_empty_state);
-        FloatingActionButton fabAddGoal = view.findViewById(R.id.fab_add_goal);
+        lvGoals = view.findViewById(R.id.rv_goals);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        fabAddGoal = view.findViewById(R.id.fab_add_goal);
 
         adapter = new GoalListAdapter(requireContext(), this);
         lvGoals.setAdapter(adapter);
@@ -57,27 +64,27 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     }
 
     private void showAddGoalDialog() {
-        LinearLayout layout = new LinearLayout(requireContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 24, 48, 24);
+        dialogLayout = new LinearLayout(requireContext());
+        dialogLayout.setOrientation(LinearLayout.VERTICAL);
+        dialogLayout.setPadding(48, 24, 48, 24);
 
-        EditText etName = new EditText(requireContext());
-        etName.setHint("Tên mục tiêu (VD: Mua xe, Du lịch...)");
-        layout.addView(etName);
+        etGoalName = new EditText(requireContext());
+        etGoalName.setHint("Tên mục tiêu (VD: Mua xe, Du lịch...)");
+        dialogLayout.addView(etGoalName);
 
-        EditText etTargetAmount = new EditText(requireContext());
-        etTargetAmount.setHint("Số tiền mục tiêu (VNĐ)");
-        etTargetAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        etTargetAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
-        etTargetAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etTargetAmount));
-        layout.addView(etTargetAmount);
+        etGoalAmount = new EditText(requireContext());
+        etGoalAmount.setHint("Số tiền mục tiêu (VNĐ)");
+        etGoalAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etGoalAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etGoalAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etGoalAmount));
+        dialogLayout.addView(etGoalAmount);
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Thêm mục tiêu mới")
-                .setView(layout)
+                .setView(dialogLayout)
                 .setPositiveButton("Lưu", (dialog, which) -> {
-                    String name = etName.getText().toString().trim();
-                    String amountStr = etTargetAmount.getText().toString().trim();
+                    String name = etGoalName.getText().toString().trim();
+                    String amountStr = etGoalAmount.getText().toString().trim();
                     if (name.isEmpty() || amountStr.isEmpty()) {
                         Toast.makeText(requireContext(), "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
                         return;
@@ -93,22 +100,22 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
 
     @Override
     public void onAddFundsClick(Goal goal) {
-        LinearLayout layout = new LinearLayout(requireContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 24, 48, 24);
+        dialogLayout = new LinearLayout(requireContext());
+        dialogLayout.setOrientation(LinearLayout.VERTICAL);
+        dialogLayout.setPadding(48, 24, 48, 24);
 
-        EditText etAmount = new EditText(requireContext());
-        etAmount.setHint("Số tiền nạp thêm (VNĐ)");
-        etAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
-        etAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etAmount));
-        layout.addView(etAmount);
+        etGoalAmount = new EditText(requireContext());
+        etGoalAmount.setHint("Số tiền nạp thêm (VNĐ)");
+        etGoalAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etGoalAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        etGoalAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etGoalAmount));
+        dialogLayout.addView(etGoalAmount);
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Cập nhật tiến độ: " + goal.getName())
-                .setView(layout)
+                .setView(dialogLayout)
                 .setPositiveButton("Cập nhật", (dialog, which) -> {
-                    String amountStr = etAmount.getText().toString().trim();
+                    String amountStr = etGoalAmount.getText().toString().trim();
                     if (amountStr.isEmpty()) return;
                     amountStr = amountStr.replace(".", "");
                     double addedAmount = Double.parseDouble(amountStr);

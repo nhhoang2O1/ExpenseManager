@@ -36,6 +36,13 @@ public class HomeFragment extends Fragment {
     private TextView tvBalance, tvIncome, tvExpense, tvMonthYear;
     private android.widget.LinearLayout layoutRecentTransactions;
     private View layoutEmptyState;
+    
+    private android.widget.Button btnEmptyCta;
+    private TextView tvEmptyTitle, tvEmptyDesc;
+    private MaterialButton btnQuickIncome, btnQuickExpense, btnQuickReminder;
+    private TextView tvSeeAll;
+    private androidx.cardview.widget.CardView cardDailyStats;
+    private TextView tvDailyDate, tvDailyIncome, tvDailyExpense;
 
     @Nullable
     @Override
@@ -52,26 +59,26 @@ public class HomeFragment extends Fragment {
         tvExpense = view.findViewById(R.id.tv_expense);
         tvMonthYear = view.findViewById(R.id.tv_month_year);
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
-        android.widget.Button btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
+        btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
         layoutRecentTransactions = view.findViewById(R.id.layout_recent_transactions);
-        MaterialButton btnQuickIncome = view.findViewById(R.id.btn_quick_income);
-        MaterialButton btnQuickExpense = view.findViewById(R.id.btn_quick_expense);
-        MaterialButton btnQuickReminder = view.findViewById(R.id.btn_quick_reminder);
-        TextView tvSeeAll = view.findViewById(R.id.tv_see_all);
+        btnQuickIncome = view.findViewById(R.id.btn_quick_income);
+        btnQuickExpense = view.findViewById(R.id.btn_quick_expense);
+        btnQuickReminder = view.findViewById(R.id.btn_quick_reminder);
+        tvSeeAll = view.findViewById(R.id.tv_see_all);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        tvEmptyDesc = view.findViewById(R.id.tv_empty_desc);
 
         String currentDateLabel = "Hôm nay, " + DateUtils.formatDate(System.currentTimeMillis());
         tvMonthYear.setText(currentDateLabel);
 
-        ((TextView) view.findViewById(R.id.tv_empty_title)).setText(R.string.empty_home_title);
-        ((TextView) view.findViewById(R.id.tv_empty_desc)).setText(R.string.empty_home_desc);
+        tvEmptyTitle.setText(R.string.empty_home_title);
+        tvEmptyDesc.setText(R.string.empty_home_desc);
         btnEmptyCta.setText(R.string.empty_home_cta);
 
-        // Setup adapter
         adapter = new TransactionListAdapter(requireContext());
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        // Observe category cache
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         db.categoryDao().getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             Map<Long, Category> cache = new HashMap<>();
@@ -80,29 +87,24 @@ public class HomeFragment extends Fragment {
             updateRecentTransactionsList(viewModel.getRecentTransactions().getValue());
         });
 
-        // Observe thu nhập
         viewModel.getTotalIncome().observe(getViewLifecycleOwner(), income -> {
             tvIncome.setText(CurrencyFormatter.format(income != null ? income : 0));
         });
 
-        // Observe chi tiêu
         viewModel.getTotalExpense().observe(getViewLifecycleOwner(), expense -> {
             tvExpense.setText(CurrencyFormatter.format(expense != null ? expense : 0));
         });
 
-        // Observe số dư
         viewModel.getBalance().observe(getViewLifecycleOwner(), bal -> {
             tvBalance.setText(CurrencyFormatter.format(bal != null ? bal : 0));
         });
 
-        // Observe giao dịch gần nhất
         viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::updateRecentTransactionsList);
 
-        // Daily Statistics UI Setup
-        androidx.cardview.widget.CardView cardDailyStats = view.findViewById(R.id.card_daily_stats);
-        TextView tvDailyDate = view.findViewById(R.id.tv_daily_date);
-        TextView tvDailyIncome = view.findViewById(R.id.tv_daily_income);
-        TextView tvDailyExpense = view.findViewById(R.id.tv_daily_expense);
+        cardDailyStats = view.findViewById(R.id.card_daily_stats);
+        tvDailyDate = view.findViewById(R.id.tv_daily_date);
+        tvDailyIncome = view.findViewById(R.id.tv_daily_income);
+        tvDailyExpense = view.findViewById(R.id.tv_daily_expense);
 
         viewModel.getSelectedDate().observe(getViewLifecycleOwner(), date -> {
             if (date != null) {

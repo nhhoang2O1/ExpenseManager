@@ -33,6 +33,8 @@ public class AddEditTransactionActivity extends AppCompatActivity {
     private GridView gvCategories;
     private MaterialButton btnSave;
     private AppDatabase db;
+    private ImageButton btnBack;
+    private TextView tvTitle;
 
     private TransactionType selectedType = TransactionType.EXPENSE;
     private long selectedDate = System.currentTimeMillis();
@@ -52,28 +54,23 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         SessionManager session = new SessionManager(this);
         userId = session.getUserId();
 
-        // Init views
         etAmount = findViewById(R.id.et_amount);
         etNote = findViewById(R.id.et_note);
         etDate = findViewById(R.id.et_date);
         toggleType = findViewById(R.id.toggle_type);
         gvCategories = findViewById(R.id.rv_categories);
         btnSave = findViewById(R.id.btn_save);
-        ImageButton btnBack = findViewById(R.id.btn_back);
-        TextView tvTitle = findViewById(R.id.tv_title);
+        btnBack = findViewById(R.id.btn_back);
+        tvTitle = findViewById(R.id.tv_title);
 
-        // Add NumberTextWatcher for thousand separator
         etAmount.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
         etAmount.addTextChangedListener(new com.example.appquanlychitieu.util.NumberTextWatcher(etAmount));
 
-        // Ngày mặc định
         etDate.setText(DateUtils.formatDate(selectedDate));
 
-        // Setup GridView với BaseAdapter
         categoryAdapter = new CategoryGridViewAdapter(this);
         gvCategories.setAdapter(categoryAdapter);
 
-        // Xử lý click chọn danh mục
         categoryAdapter.setOnCategoryClickListener((category, position) -> {
             if ("Khác".equalsIgnoreCase(category.getName())) {
                 showCustomCategoryDialog();
@@ -83,7 +80,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             }
         });
 
-        // Kiểm tra chế độ sửa
         String requestedType = getIntent().getStringExtra(EXTRA_TRANSACTION_TYPE);
         if (requestedType != null) {
             try {
@@ -99,7 +95,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             loadTransaction();
         }
 
-        // Toggle loại giao dịch
         toggleType.check(selectedType == TransactionType.INCOME ? R.id.btn_income : R.id.btn_expense);
         toggleType.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
@@ -112,21 +107,19 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveTransaction());
 
-        // Load danh mục lần đầu
         loadCategories();
     }
 
     private void loadCategories() {
-        // Remove observer cũ nếu có
+        
         if (categoryLiveData != null && categoryObserver != null) {
             categoryLiveData.removeObserver(categoryObserver);
         }
 
-        // Tạo observer mới và observe
         categoryLiveData = db.categoryDao().getCategoriesByType(selectedType);
         categoryObserver = categories -> {
             if (categories != null && !categories.isEmpty()) {
-                // Sắp xếp các danh mục, đưa các mục phổ biến lên đầu
+                
                 java.util.Collections.sort(categories, (c1, c2) -> {
                     int weight1 = getCategoryWeight(c1.getName());
                     int weight2 = getCategoryWeight(c2.getName());
@@ -141,7 +134,7 @@ public class AddEditTransactionActivity extends AppCompatActivity {
                     categoryAdapter.setSelectedCategoryId(selectedCategoryId);
                 }
             } else {
-                // Nếu không có categories, khởi tạo lại
+                
                 Toast.makeText(this, "Đang khởi tạo danh mục...", Toast.LENGTH_SHORT).show();
                 initializeDefaultCategories();
             }
@@ -152,7 +145,7 @@ public class AddEditTransactionActivity extends AppCompatActivity {
     private int getCategoryWeight(String name) {
         if (name == null) return 100;
         switch (name) {
-            // Expense
+            
             case "Ăn uống": return 1;
             case "Di chuyển": return 2;
             case "Hóa đơn": return 3;
@@ -162,14 +155,13 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             case "Giáo dục": return 7;
             case "Giải trí": return 8;
             
-            // Income
             case "Lương": return 1;
             case "Làm thêm": return 2;
             case "Đầu tư": return 3;
             case "Quà tặng": return 4;
             
             case "Khác": return 999;
-            default: return 100; // Custom categories 
+            default: return 100; 
         }
     }
 
@@ -177,10 +169,9 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             int count = db.categoryDao().getCategoryCount();
             if (count == 0) {
-                // Thêm categories mặc định
+                
                 java.util.List<Category> defaultCategories = new java.util.ArrayList<>();
                 
-                // Expense categories
                 defaultCategories.add(new Category("Ăn uống", "ic_food", "#FF5722", TransactionType.EXPENSE, true));
                 defaultCategories.add(new Category("Di chuyển", "ic_transport", "#2196F3", TransactionType.EXPENSE, true));
                 defaultCategories.add(new Category("Mua sắm", "ic_shopping", "#E91E63", TransactionType.EXPENSE, true));
@@ -191,7 +182,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
                 defaultCategories.add(new Category("Hóa đơn", "ic_bill", "#FF9800", TransactionType.EXPENSE, true));
                 defaultCategories.add(new Category("Khác", "ic_other", "#607D8B", TransactionType.EXPENSE, true));
 
-                // Income categories
                 defaultCategories.add(new Category("Lương", "ic_salary", "#4CAF50", TransactionType.INCOME, true));
                 defaultCategories.add(new Category("Quà tặng", "ic_gift", "#E91E63", TransactionType.INCOME, true));
                 defaultCategories.add(new Category("Đầu tư", "ic_invest", "#00BCD4", TransactionType.INCOME, true));
@@ -248,7 +238,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
             return;
         }
 
-        // Remove thousand separators before parsing
         amountStr = amountStr.replace(".", "");
         
         double amount;
@@ -301,7 +290,6 @@ public class AddEditTransactionActivity extends AppCompatActivity {
         final android.widget.EditText input = new android.widget.EditText(this);
         input.setHint("Tên danh mục");
         
-        // Thêm margin cho EditText
         android.widget.FrameLayout container = new android.widget.FrameLayout(this);
         android.widget.FrameLayout.LayoutParams params = new  android.widget.FrameLayout.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
@@ -342,8 +330,7 @@ public class AddEditTransactionActivity extends AppCompatActivity {
                         if (finalExists) {
                             categoryAdapter.setSelectedCategoryId(selectedCategoryId);
                         }
-                        // Nếu chưa tồn tại, DB sẽ update LiveData và adapter sẽ được render lại
-                        // Tại loadCategories, selectedCategoryId sẽ được set lại
+                        
                     });
                 });
             }

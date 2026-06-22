@@ -18,8 +18,8 @@ public class Transaction {
     private long id;
     private double amount;
     private String note;
-    private long date; // timestamp in millis
-    private Long categoryId; // Đổi thành Long để có thể null
+    private long date; 
+    private Long categoryId; 
     private TransactionType type;
     private long userId;
 
@@ -34,7 +34,6 @@ public class Transaction {
         this.userId = userId;
     }
 
-    // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 

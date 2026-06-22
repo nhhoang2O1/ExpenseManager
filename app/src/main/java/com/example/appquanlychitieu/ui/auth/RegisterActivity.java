@@ -19,6 +19,8 @@ import com.google.android.material.textfield.TextInputEditText;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPassword, etConfirmPassword;
+    private MaterialButton btnRegister;
+    private TextView tvLogin;
     private SessionManager sessionManager;
 
     @Override
@@ -32,13 +34,13 @@ public class RegisterActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
-        MaterialButton btnRegister = findViewById(R.id.btn_register);
-        TextView tvLogin = findViewById(R.id.tv_login);
+        btnRegister = findViewById(R.id.btn_register);
+        tvLogin = findViewById(R.id.tv_login);
 
         btnRegister.setOnClickListener(v -> register());
 
         tvLogin.setOnClickListener(v -> {
-            finish(); // Quay lại LoginActivity
+            finish(); 
         });
     }
 
@@ -48,7 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
         String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
         String confirmPassword = etConfirmPassword.getText() != null ? etConfirmPassword.getText().toString().trim() : "";
 
-        // Validation
         if (name.isEmpty()) {
             etName.setError("Vui lòng nhập họ tên");
             etName.requestFocus();
@@ -81,7 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         AppDatabase db = AppDatabase.getDatabase(this);
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            // Kiểm tra email đã tồn tại
+            
             int exists = db.userDao().checkEmailExists(email);
             if (exists > 0) {
                 runOnUiThread(() -> {
@@ -91,17 +92,15 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Tạo user mới — hash mật khẩu trước khi lưu vào database
             String hashedPassword = PasswordUtils.hash(password);
             User user = new User(name, email, hashedPassword);
             long userId = db.userDao().insert(user);
 
             runOnUiThread(() -> {
-                // Tự động đăng nhập sau khi đăng ký thành công
-                sessionManager.createLoginSession(userId, name, email);
+                
+                sessionManager.createLoginSession(userId, name, email, true);
                 Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                 
-                // Chuyển đến MainActivity
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

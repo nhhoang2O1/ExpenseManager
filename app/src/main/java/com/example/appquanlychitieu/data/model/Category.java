@@ -23,7 +23,6 @@ public class Category {
         this.isDefault = isDefault;
     }
 
-    // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 

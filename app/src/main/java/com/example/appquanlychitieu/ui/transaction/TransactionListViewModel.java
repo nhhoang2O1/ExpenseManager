@@ -40,19 +40,18 @@ public class TransactionListViewModel extends AndroidViewModel {
         SessionManager session = new SessionManager(application);
         userId = session.getUserId();
 
-        // Default: ALL, no date filter (0 to MAX)
         filterOptions.setValue(new FilterOptions("ALL", 0L, Long.MAX_VALUE));
 
         transactions = Transformations.switchMap(filterOptions, options -> {
             if (options.startDate == 0L && options.endDate == Long.MAX_VALUE) {
-                // No date filter
+                
                 switch (options.type) {
                     case "EXPENSE": return repository.getTransactionsByType(userId, TransactionType.EXPENSE);
                     case "INCOME": return repository.getTransactionsByType(userId, TransactionType.INCOME);
                     default: return repository.getAllTransactions(userId);
                 }
             } else {
-                // Date filter active
+                
                 switch (options.type) {
                     case "EXPENSE":
                         return repository.getTransactionsByTypeAndDateRange(userId, TransactionType.EXPENSE, options.startDate, options.endDate);
