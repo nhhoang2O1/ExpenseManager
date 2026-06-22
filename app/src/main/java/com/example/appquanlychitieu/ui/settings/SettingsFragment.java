@@ -24,7 +24,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 public class SettingsFragment extends Fragment {
     private SessionManager sessionManager;
     
-    private View cardReset, cardLogout, cardGoals, cardReminders;
+    private View cardReset, cardLogout;
     private SwitchMaterial switchDarkMode;
 
     @Nullable
@@ -41,8 +41,6 @@ public class SettingsFragment extends Fragment {
 
         cardReset = view.findViewById(R.id.card_reset_data);
         cardLogout = view.findViewById(R.id.card_logout);
-        cardGoals = view.findViewById(R.id.card_goals);
-        cardReminders = view.findViewById(R.id.card_reminders);
         switchDarkMode = view.findViewById(R.id.switch_dark_mode);
         android.widget.TextView tvUsername = view.findViewById(R.id.tv_username);
         android.widget.TextView tvEmail = view.findViewById(R.id.tv_email);
@@ -54,12 +52,6 @@ public class SettingsFragment extends Fragment {
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ThemeManager.setDarkMode(requireContext(), isChecked);
         });
-
-        cardGoals.setOnClickListener(v ->
-                Navigation.findNavController(v).navigate(R.id.action_settings_to_goals));
-
-        cardReminders.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), ReminderActivity.class)));
 
         cardReset.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())

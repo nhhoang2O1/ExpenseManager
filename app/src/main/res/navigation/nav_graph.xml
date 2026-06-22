@@ -27,7 +27,7 @@
     <fragment
         android:id="@+id/navigation_budget"
         android:name="com.example.appquanlychitieu.ui.budget.BudgetFragment"
-        android:label="@string/nav_budget"
+        android:label="@string/budget_title"
         tools:layout="@layout/fragment_budget" />
 
     <!-- Tab Cài đặt — có action chuyển sang Goals -->
@@ -36,9 +36,6 @@
         android:name="com.example.appquanlychitieu.ui.settings.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_settings_to_goals"
-            app:destination="@id/navigation_goals" />
     </fragment>
 
     <!-- Trang Mục tiêu tiết kiệm (truy cập từ Settings) -->

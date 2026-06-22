@@ -5,7 +5,7 @@
     <string name="nav_home">Tổng quan</string>
     <string name="nav_transactions">Giao dịch</string>
     <string name="nav_statistics">Thống kê</string>
-    <string name="nav_budget">Mục tiêu</string>
+    <string name="nav_goals">Mục tiêu</string>
     <string name="nav_settings">Cài đặt</string>
 
     <!-- Home -->
