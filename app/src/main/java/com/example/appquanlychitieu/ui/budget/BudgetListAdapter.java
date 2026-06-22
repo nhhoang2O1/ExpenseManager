@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * BaseAdapter cho ListView hiển thị danh sách ngân sách.
- */
 public class BudgetListAdapter extends BaseAdapter {
 
     private final Context context;
@@ -75,7 +72,6 @@ public class BudgetListAdapter extends BaseAdapter {
         Category category = categoryCache.get(budget.getCategoryId());
         double spent = spentMap.getOrDefault(budget.getCategoryId(), 0.0);
 
-        // Thông tin danh mục
         if (category != null) {
             holder.tvCategoryName.setText(category.getName());
             int iconRes = getIconResource(category.getIcon());
@@ -90,7 +86,6 @@ public class BudgetListAdapter extends BaseAdapter {
             } catch (Exception ignored) {}
         }
 
-        // Thông tin ngân sách
         holder.tvBudgetLabel.setText("Hạn mức: " + CurrencyFormatter.format(budget.getAmount()));
         holder.tvSpent.setText(CurrencyFormatter.format(spent));
 

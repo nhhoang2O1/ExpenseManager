@@ -10,7 +10,7 @@ public class ExpenseManagerApp extends Application {
     public void onCreate() {
         super.onCreate();
         ThemeManager.applySavedTheme(this);
-        // Initialize database (triggers prepopulate callback)
+        
         AppDatabase.getDatabase(this);
     }
 }

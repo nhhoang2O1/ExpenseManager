@@ -18,7 +18,7 @@ public class Budget {
     private long id;
     private long categoryId;
     private double amount;
-    private String monthYear; // format: "2024-01"
+    private String monthYear; 
     private long userId;
 
     public Budget() {}
@@ -30,7 +30,6 @@ public class Budget {
         this.userId = userId;
     }
 
-    // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 

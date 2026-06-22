@@ -40,7 +40,6 @@ public class StatisticsViewModel extends AndroidViewModel {
             return repository.getCategorySummary(userId, TransactionType.EXPENSE, start, end);
         });
 
-        // Lịch sử tài chính tất cả các tháng
         monthlySummary = repository.getMonthlySummary(userId);
     }
 

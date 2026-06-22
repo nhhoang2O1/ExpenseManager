@@ -3,9 +3,6 @@ package com.example.appquanlychitieu.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/**
- * Quản lý session đăng nhập bằng SharedPreferences
- */
 public class SessionManager {
     private static final String PREF_NAME = "expense_manager_session";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
@@ -22,57 +19,36 @@ public class SessionManager {
         editor = prefs.edit();
     }
 
-    /**
-     * Lưu thông tin đăng nhập
-     */
     public void createLoginSession(long userId, String name, String email, boolean rememberMe) {
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putLong(KEY_USER_ID, userId);
         editor.putString(KEY_USER_NAME, name);
         editor.putString(KEY_USER_EMAIL, email);
         editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
-        editor.commit(); // Dùng commit() thay vì apply() để đảm bảo lưu ngay lập tức
+        editor.commit(); 
     }
 
-    /**
-     * Kiểm tra đã đăng nhập chưa
-     */
     public boolean isLoggedIn() {
         return prefs.getBoolean(KEY_IS_LOGGED_IN, false)
                 && prefs.getLong(KEY_USER_ID, -1) > 0;
     }
 
-    /**
-     * Kiểm tra người dùng có muốn lưu thông tin không
-     */
     public boolean isRememberMe() {
         return prefs.getBoolean(KEY_REMEMBER_ME, false);
     }
 
-    /**
-     * Lấy user ID hiện tại
-     */
     public long getUserId() {
         return prefs.getLong(KEY_USER_ID, -1);
     }
 
-    /**
-     * Lấy tên user hiện tại
-     */
     public String getUserName() {
         return prefs.getString(KEY_USER_NAME, "");
     }
 
-    /**
-     * Lấy email user hiện tại
-     */
     public String getUserEmail() {
         return prefs.getString(KEY_USER_EMAIL, "");
     }
 
-    /**
-     * Đăng xuất - xóa session
-     */
     public void logout() {
         editor.clear();
         editor.apply();

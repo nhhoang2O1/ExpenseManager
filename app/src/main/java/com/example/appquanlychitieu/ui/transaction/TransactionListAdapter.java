@@ -21,16 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * BaseAdapter cho ListView hiển thị danh sách giao dịch.
- */
 public class TransactionListAdapter extends BaseAdapter {
 
     private final Context context;
     private List<Transaction> transactions = new ArrayList<>();
     private Map<Long, Category> categoryCache = new HashMap<>();
 
-    // Interface callback click
     public interface OnItemClickListener {
         void onClick(Transaction transaction);
         void onLongClick(Transaction transaction);
@@ -69,7 +65,6 @@ public class TransactionListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
-        // View Holder Pattern — tái sử dụng view để tăng hiệu năng
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item_transaction, parent, false);
             holder = new ViewHolder(convertView);
@@ -81,7 +76,6 @@ public class TransactionListAdapter extends BaseAdapter {
         Transaction transaction = transactions.get(position);
         Category category = categoryCache.get(transaction.getCategoryId());
 
-        // Danh mục ở trên, Ghi chú & Ngày tháng ở dưới
         String note = transaction.getNote();
         String categoryName = category != null ? category.getName() : "";
         String dateLabel = com.example.appquanlychitieu.util.DateUtils.getRelativeDateLabel(transaction.getDate());
@@ -93,12 +87,10 @@ public class TransactionListAdapter extends BaseAdapter {
             holder.tvCategory.setText(dateLabel);
         }
 
-        // Số tiền
         boolean isExpense = transaction.getType() == TransactionType.EXPENSE;
         holder.tvAmount.setText(CurrencyFormatter.formatWithSign(transaction.getAmount(), isExpense));
         holder.tvAmount.setTextColor(context.getColor(isExpense ? R.color.expense_color : R.color.income_color));
 
-        // Icon và màu danh mục
         if (category != null) {
             int iconResId = getIconResource(category.getIcon());
             if (iconResId != 0) holder.ivCategoryIcon.setImageResource(iconResId);
@@ -112,7 +104,6 @@ public class TransactionListAdapter extends BaseAdapter {
             } catch (Exception ignored) {}
         }
 
-        // Click listener
         final Transaction t = transaction;
         convertView.setOnClickListener(v -> { if (listener != null) listener.onClick(t); });
         convertView.setOnLongClickListener(v -> {

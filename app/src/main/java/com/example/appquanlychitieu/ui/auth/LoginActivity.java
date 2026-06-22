@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
         AppDatabase db = AppDatabase.getDatabase(this);
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            // Lấy user theo email, sau đó verify password hash
+            
             User user = db.userDao().getUserByEmailForLogin(email);
             boolean isPasswordCorrect = user != null && PasswordUtils.verify(password, user.getPassword());
             runOnUiThread(() -> {

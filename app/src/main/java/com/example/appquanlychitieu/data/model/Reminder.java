@@ -9,7 +9,7 @@ public class Reminder {
     private long id;
     
     private String content;
-    private int dayOfMonth; // 1 to 31
+    private int dayOfMonth; 
     private int hour;
     private int minute;
     private long userId;

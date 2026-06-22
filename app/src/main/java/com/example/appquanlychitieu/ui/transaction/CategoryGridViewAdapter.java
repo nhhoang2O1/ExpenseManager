@@ -13,9 +13,6 @@ import com.example.appquanlychitieu.data.model.Category;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * BaseAdapter cho GridView hiển thị danh mục.
- */
 public class CategoryGridViewAdapter extends BaseAdapter {
 
     private final Context context;
@@ -82,7 +79,6 @@ public class CategoryGridViewAdapter extends BaseAdapter {
         Category category = categories.get(position);
         holder.tvName.setText(category.getName());
 
-        // Hiệu ứng chọn
         if (position == selectedPosition) {
             convertView.setBackgroundResource(R.drawable.bg_category_choice_selected);
             holder.tvName.setTextColor(context.getColor(R.color.on_primary));
@@ -91,7 +87,6 @@ public class CategoryGridViewAdapter extends BaseAdapter {
             holder.tvName.setTextColor(context.getColor(R.color.text_primary));
         }
 
-        // Click
         final int pos = position;
         final Category cat = category;
         convertView.setOnClickListener(v -> {

@@ -36,7 +36,6 @@ public class StatisticsFragment extends Fragment {
     private TextView tvCurrentMonth, tvEmpty, tvHistoryEmpty;
     private android.widget.LinearLayout layoutCategorySummary, layoutMonthlyHistory;
     
-    // UI Variables
     private ImageButton btnPrev, btnNext;
 
     @Nullable
@@ -62,14 +61,12 @@ public class StatisticsFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(StatisticsViewModel.class);
 
-        // Observe tháng
         viewModel.getSelectedMonthYear().observe(getViewLifecycleOwner(), monthYear -> {
             Calendar cal = Calendar.getInstance();
             cal.set(monthYear[0], monthYear[1], 1);
             tvCurrentMonth.setText(DateUtils.formatDisplayMonth(cal.getTimeInMillis()));
         });
 
-        // Observe thống kê danh mục
         viewModel.getCategorySummary().observe(getViewLifecycleOwner(), summaries -> {
             if (summaries != null && !summaries.isEmpty()) {
                 updatePieChart(summaries);
@@ -91,7 +88,6 @@ public class StatisticsFragment extends Fragment {
             }
         });
 
-        // Observe lịch sử tài chính
         viewModel.getMonthlySummary().observe(getViewLifecycleOwner(), summaries -> {
             if (summaries != null && !summaries.isEmpty()) {
                 MonthlySummaryAdapter adapter = new MonthlySummaryAdapter(summaries);
@@ -144,7 +140,6 @@ public class StatisticsFragment extends Fragment {
         pieChart.invalidate();
     }
 
-    // BaseAdapter cho ListView thống kê danh mục
     class CategorySummaryAdapter extends BaseAdapter {
         private final List<CategorySummary> summaries;
 
@@ -191,7 +186,6 @@ public class StatisticsFragment extends Fragment {
         return requireContext().getResources().getIdentifier(iconName, "drawable", requireContext().getPackageName());
     }
 
-    // BaseAdapter cho ListView lịch sử tài chính
     class MonthlySummaryAdapter extends BaseAdapter {
         private final List<MonthlySummary> summaries;
 

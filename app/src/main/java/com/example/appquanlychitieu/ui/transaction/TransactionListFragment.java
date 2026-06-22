@@ -44,12 +44,10 @@ import java.util.List;
 import java.util.Map;
 
 public class TransactionListFragment extends Fragment {
-    // Transaction
+    
     private TransactionListViewModel viewModel;
     private TransactionListAdapter adapter;
 
-
-    // Budget
     private BudgetViewModel budgetViewModel;
     private BudgetListAdapter budgetAdapter;
     private TransactionRepository transactionRepository;
@@ -59,7 +57,6 @@ public class TransactionListFragment extends Fragment {
     private LinearLayout llBudgetsContainer;
     private View layoutEmptyBudget;
     
-    // UI Variables
     private ListView lvTransactions;
     private View layoutEmptyState;
     private android.widget.Button btnEmptyCta;
@@ -79,7 +76,6 @@ public class TransactionListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ==== TRANSACTION SETUP ====
         lvTransactions = view.findViewById(R.id.rv_transactions);
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
         btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
@@ -100,7 +96,6 @@ public class TransactionListFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(TransactionListViewModel.class);
 
-        // ==== BUDGET SETUP ====
         llBudgetsContainer = view.findViewById(R.id.ll_budgets_container);
         layoutEmptyBudget = view.findViewById(R.id.layout_empty_budget);
         tvCurrentMonth = view.findViewById(R.id.tv_current_month);
@@ -112,7 +107,6 @@ public class TransactionListFragment extends Fragment {
         budgetViewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
         transactionRepository = new TransactionRepository(requireActivity().getApplication());
 
-        // Sync adapter with LinearLayout
         budgetAdapter.registerDataSetObserver(new android.database.DataSetObserver() {
             @Override
             public void onChanged() {
@@ -124,7 +118,6 @@ public class TransactionListFragment extends Fragment {
             }
         });
 
-        // Category cache
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         db.categoryDao().getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             Map<Long, Category> cache = new HashMap<>();
@@ -137,7 +130,6 @@ public class TransactionListFragment extends Fragment {
             budgetAdapter.setCategoryCache(cache);
         });
 
-        // Observe danh sách giao dịch
         viewModel.getTransactions().observe(getViewLifecycleOwner(), transactions -> {
             if (transactions != null && !transactions.isEmpty()) {
                 adapter.setTransactions(transactions);
@@ -149,7 +141,6 @@ public class TransactionListFragment extends Fragment {
             }
         });
 
-        // Filter chips
         chipAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) viewModel.setFilterType("ALL");
         });
@@ -160,10 +151,8 @@ public class TransactionListFragment extends Fragment {
             if (isChecked) viewModel.setFilterType("INCOME");
         });
 
-        // Date Filter
         btnFilterDate.setOnClickListener(v -> showDateRangePicker());
 
-        // CTA empty state
         btnEmptyCta.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), AddEditTransactionActivity.class);
             if (chipIncome.isChecked()) {
@@ -174,7 +163,6 @@ public class TransactionListFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Click item transaction
         adapter.setOnItemClickListener(new TransactionListAdapter.OnItemClickListener() {
             @Override
             public void onClick(Transaction transaction) {
@@ -195,7 +183,6 @@ public class TransactionListFragment extends Fragment {
             }
         });
 
-        // ==== BUDGET OBSERVERS & ACTIONS ====
         budgetViewModel.getBudgets().observe(getViewLifecycleOwner(), budgets -> {
             if (budgets != null && !budgets.isEmpty()) {
                 budgetAdapter.setBudgets(budgets);
@@ -243,8 +230,7 @@ public class TransactionListFragment extends Fragment {
         picker.addOnPositiveButtonClickListener(selection -> {
             long start = selection.first;
             long end = selection.second;
-            // MaterialDatePicker returns UTC timestamps for midnight. Let's fix time to cover full days if needed,
-            // but for simple calculation:
+            
             long days = (end - start) / (1000 * 60 * 60 * 24);
             if (days > 15) {
                 Toast.makeText(requireContext(), "Chỉ được chọn tối đa 15 ngày", Toast.LENGTH_SHORT).show();

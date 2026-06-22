@@ -24,7 +24,6 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 public class SettingsFragment extends Fragment {
     private SessionManager sessionManager;
     
-    // UI Variables
     private View cardReset, cardLogout, cardGoals, cardReminders;
     private SwitchMaterial switchDarkMode;
 
@@ -46,21 +45,17 @@ public class SettingsFragment extends Fragment {
         cardReminders = view.findViewById(R.id.card_reminders);
         switchDarkMode = view.findViewById(R.id.switch_dark_mode);
 
-        // Dark mode
         switchDarkMode.setChecked(ThemeManager.isDarkMode(requireContext()));
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ThemeManager.setDarkMode(requireContext(), isChecked);
         });
 
-        // Mục tiêu tiết kiệm — navigate đến GoalFragment
         cardGoals.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_settings_to_goals));
 
-        // Nhắc nhở — mở ReminderActivity
         cardReminders.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), ReminderActivity.class)));
 
-        // Reset data
         cardReset.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle(R.string.reset_data)
@@ -81,7 +76,6 @@ public class SettingsFragment extends Fragment {
                     .show();
         });
 
-        // Logout
         cardLogout.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Đăng xuất")

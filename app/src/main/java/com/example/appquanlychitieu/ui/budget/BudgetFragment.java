@@ -45,7 +45,6 @@ public class BudgetFragment extends Fragment {
     private LiveData<List<CategorySpent>> spentLiveData;
     private Observer<List<CategorySpent>> spentObserver;
 
-    // Khai báo các biến giao diện ở cấp class giống slide của thầy
     private ListView lvBudgets;
     private View layoutEmptyState;
     private android.widget.Button btnEmptyCta;
@@ -66,7 +65,6 @@ public class BudgetFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Ánh xạ View
         lvBudgets = view.findViewById(R.id.rv_budgets);
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
         btnEmptyCta = view.findViewById(R.id.btn_empty_cta);
@@ -77,19 +75,16 @@ public class BudgetFragment extends Fragment {
         btnNext = view.findViewById(R.id.btn_next_month);
         fabAdd = view.findViewById(R.id.fab_add_budget);
 
-        // Thiết lập dữ liệu mặc định
         tvEmptyTitle.setText(R.string.empty_budget_title);
         tvEmptyDesc.setText(R.string.empty_budget_desc);
         btnEmptyCta.setText(R.string.empty_budget_cta);
 
-        // Setup ListView với BaseAdapter
         adapter = new BudgetListAdapter(requireContext());
         lvBudgets.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
         transactionRepository = new TransactionRepository(requireActivity().getApplication());
 
-        // Category cache - lưu observer để có thể remove
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         categoriesObserver = categories -> {
             Map<Long, Category> cache = new HashMap<>();
@@ -102,7 +97,6 @@ public class BudgetFragment extends Fragment {
         };
         db.categoryDao().getAllCategories().observe(getViewLifecycleOwner(), categoriesObserver);
 
-        // Danh sách ngân sách
         viewModel.getBudgets().observe(getViewLifecycleOwner(), budgets -> {
             if (budgets != null && !budgets.isEmpty()) {
                 adapter.setBudgets(budgets);
@@ -114,7 +108,6 @@ public class BudgetFragment extends Fragment {
             }
         });
 
-        // Tạo observer cho spent data
         spentObserver = spentList -> {
             Map<Long, Double> spentMap = new HashMap<>();
             if (spentList != null) {
@@ -124,17 +117,14 @@ public class BudgetFragment extends Fragment {
             adapter.setSpentMap(spentMap);
         };
 
-        // Chi tiêu theo danh mục - observe tháng và update spent map
         viewModel.getSelectedMonthYear().observe(getViewLifecycleOwner(), monthYear -> {
             tvCurrentMonth.setText(DateUtils.formatDisplayMonth(
                     DateUtils.getStartOfMonth(monthYear[0], monthYear[1])));
             
-            // Remove observer cũ nếu có
             if (spentLiveData != null) {
                 spentLiveData.removeObserver(spentObserver);
             }
             
-            // Tạo LiveData mới và observe
             long start = DateUtils.getStartOfMonth(monthYear[0], monthYear[1]);
             long end = DateUtils.getEndOfMonth(monthYear[0], monthYear[1]);
             spentLiveData = transactionRepository.getSpentPerCategory(viewModel.getUserId(), start, end);

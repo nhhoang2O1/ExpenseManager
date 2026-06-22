@@ -17,7 +17,6 @@ public class ReminderManager {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) return;
 
-        // Intent
         Intent intent = new Intent(context, ReminderReceiver.class);
         intent.putExtra("reminder_id", reminder.getId());
         intent.putExtra("reminder_content", reminder.getContent());
@@ -34,7 +33,6 @@ public class ReminderManager {
                 flags
         );
 
-        // Tính toán thời gian
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
 
@@ -46,15 +44,13 @@ public class ReminderManager {
         calendar.set(Calendar.MINUTE, reminder.getMinute());
         calendar.set(Calendar.SECOND, 0);
 
-        // Đặt ngày theo mong muốn, nếu số ngày vượt quá tháng hiện tại thì lùi về ngày cuối tháng
         int maxDaysInCurrentMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         int targetDay = Math.min(reminder.getDayOfMonth(), maxDaysInCurrentMonth);
         calendar.set(Calendar.DAY_OF_MONTH, targetDay);
 
-        // Nếu thời gian đã qua trong tháng này, chuyển sang tháng sau
         if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
             calendar.add(Calendar.MONTH, 1);
-            // Cập nhật lại ngày cuối tháng cho tháng sau
+            
             int maxDaysInNextMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             int targetDayNextMonth = Math.min(reminder.getDayOfMonth(), maxDaysInNextMonth);
             calendar.set(Calendar.DAY_OF_MONTH, targetDayNextMonth);
@@ -63,7 +59,6 @@ public class ReminderManager {
         long alarmTime = calendar.getTimeInMillis();
         Log.d("ReminderManager", "Scheduled alarm for reminder " + reminder.getId() + " at " + calendar.getTime().toString());
 
-        // Đặt Alarm
         try {
             boolean canScheduleExact = true;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

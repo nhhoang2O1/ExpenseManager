@@ -32,12 +32,10 @@ public class ReminderActivity extends AppCompatActivity {
     private ReminderAdapter adapter;
     private static final int NOTIFICATION_PERMISSION_CODE = 1001;
     
-    // UI Variables
     private MaterialToolbar toolbar;
     private RecyclerView rvReminders;
     private TextView tvEmpty;
     
-    // Dialog UI Variables
     private TextView tvDialogTitle, tvSelectedTime;
     private EditText etContent, etDay;
     private Button btnCancel, btnSave;

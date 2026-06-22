@@ -23,12 +23,10 @@ public class GoalFragment extends Fragment implements GoalListAdapter.OnGoalInte
     private GoalViewModel viewModel;
     private GoalListAdapter adapter;
 
-    // UI Variables
     private ListView lvGoals;
     private View layoutEmptyState;
     private FloatingActionButton fabAddGoal;
     
-    // Dialog UI Variables
     private LinearLayout dialogLayout;
     private EditText etGoalName, etGoalAmount;
 

@@ -21,7 +21,6 @@ public class GoalHistoryFragment extends Fragment {
     private GoalViewModel viewModel;
     private GoalHistoryAdapter adapter;
 
-    // UI Variables
     private android.widget.TextView tvTitle;
     private android.widget.ImageButton btnBack;
     private android.widget.ListView rvHistory;

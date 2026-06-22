@@ -18,7 +18,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     
-    // UI Variables
     private FloatingActionButton fabAddTransaction;
     private BottomNavigationView bottomNav;
 
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         fabAddTransaction.setOnClickListener(v ->
                 startActivity(new Intent(this, AddEditTransactionActivity.class)));
 
-        // Setup Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
 

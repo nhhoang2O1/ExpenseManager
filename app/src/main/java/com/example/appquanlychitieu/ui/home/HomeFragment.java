@@ -37,7 +37,6 @@ public class HomeFragment extends Fragment {
     private android.widget.LinearLayout layoutRecentTransactions;
     private View layoutEmptyState;
     
-    // UI Variables
     private android.widget.Button btnEmptyCta;
     private TextView tvEmptyTitle, tvEmptyDesc;
     private MaterialButton btnQuickIncome, btnQuickExpense, btnQuickReminder;
@@ -76,12 +75,10 @@ public class HomeFragment extends Fragment {
         tvEmptyDesc.setText(R.string.empty_home_desc);
         btnEmptyCta.setText(R.string.empty_home_cta);
 
-        // Setup adapter
         adapter = new TransactionListAdapter(requireContext());
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        // Observe category cache
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         db.categoryDao().getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             Map<Long, Category> cache = new HashMap<>();
@@ -90,25 +87,20 @@ public class HomeFragment extends Fragment {
             updateRecentTransactionsList(viewModel.getRecentTransactions().getValue());
         });
 
-        // Observe thu nhập
         viewModel.getTotalIncome().observe(getViewLifecycleOwner(), income -> {
             tvIncome.setText(CurrencyFormatter.format(income != null ? income : 0));
         });
 
-        // Observe chi tiêu
         viewModel.getTotalExpense().observe(getViewLifecycleOwner(), expense -> {
             tvExpense.setText(CurrencyFormatter.format(expense != null ? expense : 0));
         });
 
-        // Observe số dư
         viewModel.getBalance().observe(getViewLifecycleOwner(), bal -> {
             tvBalance.setText(CurrencyFormatter.format(bal != null ? bal : 0));
         });
 
-        // Observe giao dịch gần nhất
         viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::updateRecentTransactionsList);
 
-        // Daily Statistics UI Setup
         cardDailyStats = view.findViewById(R.id.card_daily_stats);
         tvDailyDate = view.findViewById(R.id.tv_daily_date);
         tvDailyIncome = view.findViewById(R.id.tv_daily_income);

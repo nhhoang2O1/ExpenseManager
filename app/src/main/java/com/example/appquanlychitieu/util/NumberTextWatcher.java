@@ -59,11 +59,11 @@ public class NumberTextWatcher implements TextWatcher {
             if (sel > 0 && sel <= et.getText().length()) {
                 et.setSelection(sel);
             } else {
-                // place cursor at the end?
+                
                 et.setSelection(et.getText().length() - 1);
             }
         } catch (NumberFormatException | ParseException nfe) {
-            // do nothing?
+            
         }
 
         et.addTextChangedListener(this);
