@@ -21,6 +21,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword;
     private CheckBox cbRememberMe;
+    private MaterialButton btnLogin;
+    private TextView tvRegister;
     private SessionManager sessionManager;
 
     @Override
@@ -47,8 +49,8 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         cbRememberMe = findViewById(R.id.cb_remember_me);
-        MaterialButton btnLogin = findViewById(R.id.btn_login);
-        TextView tvRegister = findViewById(R.id.tv_register);
+        btnLogin = findViewById(R.id.btn_login);
+        tvRegister = findViewById(R.id.tv_register);
 
         btnLogin.setOnClickListener(v -> login());
 

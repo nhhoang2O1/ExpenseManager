@@ -19,6 +19,8 @@ import com.google.android.material.textfield.TextInputEditText;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPassword, etConfirmPassword;
+    private MaterialButton btnRegister;
+    private TextView tvLogin;
     private SessionManager sessionManager;
 
     @Override
@@ -32,8 +34,8 @@ public class RegisterActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
-        MaterialButton btnRegister = findViewById(R.id.btn_register);
-        TextView tvLogin = findViewById(R.id.tv_login);
+        btnRegister = findViewById(R.id.btn_register);
+        tvLogin = findViewById(R.id.tv_login);
 
         btnRegister.setOnClickListener(v -> register());
 
