@@ -41,6 +41,11 @@ public class SettingsFragment extends Fragment {
         View cardGoals = view.findViewById(R.id.card_goals);
         View cardReminders = view.findViewById(R.id.card_reminders);
         SwitchMaterial switchDarkMode = view.findViewById(R.id.switch_dark_mode);
+        android.widget.TextView tvUsername = view.findViewById(R.id.tv_username);
+        android.widget.TextView tvEmail = view.findViewById(R.id.tv_email);
+
+        tvUsername.setText(sessionManager.getUserName());
+        tvEmail.setText(sessionManager.getUserEmail());
 
         // Dark mode
         switchDarkMode.setChecked(ThemeManager.isDarkMode(requireContext()));
